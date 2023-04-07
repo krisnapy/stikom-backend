@@ -9,17 +9,16 @@ jobs:
   deploy-to-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
 
-      - name: Use Node.js
+      - name: Node Setup
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: '16'
+
+      - name: Install Caprover
+        run: npm install -g caprover
 
       - name: Deploy
-        uses: bounceapp/render-action@0.6.0
-        with:
-          service-id: { { secrets.SERVICE_ID } }
-          api-key: { { secrets.RENDER_API_KEY } }
+        run: caprover deploy -h '${{ secrets.CAPROVER_ROOT_URL }}' -p '${{ secrets.CAPROVER_PASSWORD }}' -b 'staging' -a 'dashboard'
