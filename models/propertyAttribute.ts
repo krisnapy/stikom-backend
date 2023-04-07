@@ -1,5 +1,7 @@
 import { DataTypes } from 'sequelize'
+
 import connection from '../config/config'
+
 import { ProductModel } from './productModel'
 import { ProductProperty } from './productProperty'
 

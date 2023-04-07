@@ -1,5 +1,6 @@
-import connection from '../config/config'
 import { DataTypes } from 'sequelize'
+
+import connection from '../config/config'
 
 export const User = connection.define(
   'users',

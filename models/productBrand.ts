@@ -1,4 +1,5 @@
 import { DataTypes } from 'sequelize'
+
 import connection from '../config/config'
 
 export const ProductBrand = connection.define(

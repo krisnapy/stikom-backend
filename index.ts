@@ -1,18 +1,18 @@
 import cors from 'cors'
-import dotenv from 'dotenv'
 import session from 'express-session'
-import connection from './config/config'
 import express from 'express'
 
-connection.sync({ force: true })
+import { PORT, SECRET_PORT } from './env'
 
-dotenv.config()
+import connection from './config/config'
+
+connection.sync({ force: true })
 
 const app = express()
 const routes = require('./routes/')
 
-const port = process.env.PORT
-const secret = process.env.SECRET
+const port = PORT
+const secret = SECRET_PORT
 
 const bodyParser = require('body-parser')
 const multer = require('multer')

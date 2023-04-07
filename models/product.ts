@@ -1,5 +1,6 @@
-import connection from '../config/config'
 import { DataTypes } from 'sequelize'
+
+import connection from '../config/config'
 
 import { User } from './user'
 import { ProductModel } from './productModel'

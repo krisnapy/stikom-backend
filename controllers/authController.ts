@@ -1,6 +1,8 @@
-import { User } from '../models'
 import argon2 from 'argon2'
 import jwt from 'jsonwebtoken'
+
+import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from '../env'
+import { User } from '../models'
 
 const AuthController = () => {
   const login = async (req: any, res: any) => {
@@ -19,11 +21,11 @@ const AuthController = () => {
 
       if (!matchPass) return res.status(401).json({ message: 'Wrong password' })
 
-      const refreshToken = jwt.sign({ user: userId.dataValues.id }, process.env.REFRESH_TOKEN_SECRET, {
+      const refreshToken = jwt.sign({ user: userId.dataValues.id }, REFRESH_TOKEN_SECRET, {
         expiresIn: '5d',
       })
 
-      const accessToken = jwt.sign({ user: userId.dataValues.id }, process.env.ACCESS_TOKEN_SECRET, {
+      const accessToken = jwt.sign({ user: userId.dataValues.id }, ACCESS_TOKEN_SECRET, {
         expiresIn: '5d',
       })
 

@@ -1,5 +1,7 @@
 import { DataTypes } from 'sequelize'
+
 import connection from '../config/config'
+
 import { ProductCategory } from './productCategory'
 
 export const ProductProperty = connection.define(

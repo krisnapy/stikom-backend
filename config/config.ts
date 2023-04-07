@@ -1,16 +1,21 @@
 import { Dialect, Sequelize } from "sequelize";
 
-require('dotenv').config()
+import {
+  DATABASE_DIALECT,
+  DATABASE_HOST,
+  DATABASE_NAME,
+  DATABASE_PASSWORD,
+  DATABASE_PORT,
+  DATABASE_URL,
+  DATABASE_USERNAME,
+} from "../env";
 
-const connection = new Sequelize(
-  process.env.DATABASE_NAME,
-  process.env.DATABASE_USERNAME,
-  process.env.DATABASE_PASSWORD,
-  {
-    host: process.env.DATABASE_HOST,
-    dialect: process.env.DATABASE_DIALECT as Dialect,
-    port: process.env.DATABASE_PORT as unknown as number,
-  }
-);
+const connection = DATABASE_URL
+  ? new Sequelize(DATABASE_URL)
+  : new Sequelize(DATABASE_NAME, DATABASE_USERNAME, DATABASE_PASSWORD, {
+      host: DATABASE_HOST,
+      dialect: DATABASE_DIALECT as Dialect,
+      port: DATABASE_PORT as unknown as number,
+    });
 
 export default connection;

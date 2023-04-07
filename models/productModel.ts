@@ -1,5 +1,7 @@
 import { DataTypes } from 'sequelize'
+
 import connection from '../config/config'
+
 import { ProductBrand } from './productBrand'
 import { ProductCategory } from './productCategory'
 
