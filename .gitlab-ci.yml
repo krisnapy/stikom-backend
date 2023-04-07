@@ -2,7 +2,7 @@ name: Deploy to Staging
 
 on:
   push:
-    branches: 
+    branches:
       - staging
 
 jobs:
@@ -15,14 +15,11 @@ jobs:
 
       - name: Use Node.js
         uses: actions/setup-node@v3
-        with: 
+        with:
           node-version: "16"
 
-      - name: Install Railway
-        run: npm i -g @railway/cli
-        with: 
-          service-id:
-            - 
-
-      - name: Run test
-        run: npm test
+      - name: Deploy
+        uses: bounceapp/render-action@0.6.0
+        with:
+          service-id: { { secrets.SERVICE_ID } }
+          api-key: { { secrets.RENDER_API_KEY } }
