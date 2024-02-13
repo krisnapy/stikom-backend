@@ -1,39 +1,53 @@
 {
-  "name": "express-api",
-  "version": "1.0.0",
-  "main": "index.ts",
-  "license": "MIT",
+  "name": "stikom-backend",
+  "module": "index.ts",
   "scripts": {
-    "start": "nodemon index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "bun run index.ts",
+    "dev": "bun run nodemon index.ts --watch",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-tsc": "tsc -p index.ts --outdir dist",
+    "apply-seeders": "node -r dotenv/config ./node_modules/.bin/sequelize db:seed:all",
+    "revert-seeders": "node -r dotenv/config ./node_modules/.bin/sequelize db:seed:undo:all",
+    "generate-seeders": "sequelize-cli seed:generate --seeders-path src/seeders --name"
   },
   "dependencies": {
+    "@babel/core": "^7.23.9",
+    "@babel/register": "^7.23.7",
     "@types/cors": "^2.8.13",
-    "@types/express": "^4.17.17",
-    "@types/express-session": "^1.17.6",
-    "@types/jsonwebtoken": "^9.0.1",
-    "@types/multer": "1.4.3",
-    "@types/node": "^18.14.2",
-    "@types/sequelize": "^4.28.14",
-    "argon2": "^0.30.3",
+    "@types/node": "^20.11.17",
+    "argon2": "^0.31.2",
     "body-parser": "^1.20.2",
     "connect-session-sequelize": "^7.1.5",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "dayjs": "^1.11.10",
     "dotenv": "^16.0.3",
-    "dotenv-conversion": "^1.6.6",
     "express": "^4.18.2",
-    "express-mysql-session": "^2.1.8",
     "express-session": "^1.17.3",
     "jsonwebtoken": "^9.0.0",
-    "multer": "1.4.3",
-    "mysql": "^2.18.1",
-    "mysql2": "^3.1.2",
-    "nodemon": "^2.0.20",
+    "lodash": "^4.17.21",
+    "multer": "1.4.5-lts.1",
+    "nodemon": "^3.0.3",
+    "oslo": "^1.1.0",
     "pg": "^8.10.0",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.29.0",
+    "sequelize-cli": "^6.6.2",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.5"
+    "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/cookie-parser": "^1.4.6",
+    "@types/express": "^4.17.21",
+    "@types/express-session": "^1.17.10",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/multer": "^1.4.11",
+    "@types/sequelize": "^4.28.20",
+    "babel-plugin-module-resolver": "^5.0.0",
+    "tsconfig-paths": "^4.2.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
   }
 }

@@ -1,58 +1,42 @@
-import cors from 'cors'
-import session from 'express-session'
-import express from 'express'
+import cors from "cors";
+import session from "express-session";
+import express from "express";
+import { json } from "body-parser";
+import cookieParser from "cookie-parser";
 
-import { PORT, SECRET_PORT } from './env'
+import { PORT, SECRET_PORT } from "./src/env";
+import { connection } from "./src/config";
+import routes from "./src/routes";
 
-import connection from './config/config'
+connection.sync({ force: true });
 
-connection.sync({ force: true })
+const app = express();
 
-const app = express()
-const routes = require('./routes/')
+app
+  .use(cookieParser())
+  .use(
+    session({
+      secret: SECRET_PORT,
+      resave: false,
+      saveUninitialized: true,
+      cookie: {
+        secure: "auto",
+        sameSite: "none",
+      },
+    })
+  )
+  .use(
+    cors({
+      credentials: true,
+      origin: "*",
+      allowedHeaders: ["Content-Type", "Authorization", "Refresh-Token"],
+      exposedHeaders: ["Authorization", "Refresh-Token"],
+    })
+  )
+  .use(json())
+  .use(routes)
+  .listen(PORT, () => {
+    console.log(`Application run on http://localhost:${PORT}`);
+  });
 
-const port = PORT
-const secret = SECRET_PORT
-
-const bodyParser = require('body-parser')
-const multer = require('multer')
-const forms = multer()
-const cookieParser = require('cookie-parser')
-
-app.use(cookieParser())
-
-app.use(
-  session({
-    secret: secret,
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-      secure: 'auto',
-      sameSite: 'none'
-    },
-  })
-)
-
-app.use(
-  cors({
-    credentials: true,
-    origin: 'http://localhost:3000',
-  })
-)
-
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-)
-
-app.use(forms.array())
-app.use(bodyParser.urlencoded({ extended: true }))
-
-app.use(routes)
-
-app.listen(port, () => {
-  console.log(`Application run on http://localhost:${port}`)
-})
-
-export default app
+export default app;

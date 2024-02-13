@@ -1,4 +1,7 @@
 {
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  },
   "compilerOptions": {
     /* Language and Environment */
     "target": "ES6",
@@ -8,6 +11,7 @@
     /* Modules */
     "module": "CommonJS",
 
+    "outDir": "dist",
     /* Emit */
     "noEmit": true,
 
@@ -23,6 +27,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "typeRoots": ["./global.d.ts", "./node_modules/@types"]
-  }
+    "typeRoots": ["./global.d.ts", "./node_modules/@types"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+
+  "include": ["**/*.ts", "**/*.tsx", "./src"]
 }
