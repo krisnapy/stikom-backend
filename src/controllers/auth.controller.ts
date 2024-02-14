@@ -39,7 +39,7 @@ const login: Route = async (req, res) => {
         .json({ message: "Invalid username or password!!" });
     }
 
-    const userObj = pick(user, [
+    const userObj = pick(user.dataValues, [
       "id",
       "username",
       "email",

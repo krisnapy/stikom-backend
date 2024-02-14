@@ -21,7 +21,7 @@ router.put(
   ProgramStudyController.updateProgramStudy
 );
 router.delete(
-  "/admin/program-studies",
+  "/admin/program-studies/:id",
   loginMiddleware,
   ProgramStudyController.deleteProgramStudy
 );
