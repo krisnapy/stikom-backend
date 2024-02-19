@@ -1,73 +1,100 @@
+import omit from "lodash/omit";
 import { hash } from "argon2";
 
 import {
   createUser,
+  findAllUsers,
+  findUserById,
+  updateUserById,
   deleteUserById,
-  editUserById,
-  getAllUsers,
-  getUserById,
-} from "@/services/user.services";
-import { Route } from "@/types/route.types";
+} from "@/db/services";
+import { ElysiaContext } from "@/types/elysia-context.types";
+import { InferResultType } from "@/types/drizzle.types";
 
-const createNewUser: Route = async (req, res) => {
+const createNewUser = async ({
+  body,
+  set,
+}: ElysiaContext<{ body: InferResultType<"users"> }>) => {
   try {
-    const hashPass = await hash(req.body.password);
+    const hashPass = await hash(body.password);
 
     const user = await createUser({
-      ...req.body,
-      roleId: Number(req.body.roleId),
+      ...body,
+      roleId: Number(body.roleId),
+      religionId: Number(body.religionId),
       password: hashPass,
     });
 
-    return res.status(201).json({ user: user.setAttributes("password", "") });
+    set.status = 201;
+
+    return { message: "User created", user: omit(user, ["password"]) };
   } catch (error) {
-    return res.status(500).json(error);
+    set.status = 500;
+    return { message: "Internal server error" };
   }
 };
 
-const updateUser: Route = async (req, res) => {
+const updateUser = async ({
+  body,
+  params,
+  set,
+}: ElysiaContext<{
+  body: InferResultType<"users">;
+}>) => {
   try {
-    const user = await editUserById(req.body, req.params.id);
+    const user = await updateUserById(body, params.id);
 
-    return res.status(200).json({ user });
+    if (!user) {
+      set.status = 404;
+      return { message: "User not found" };
+    }
+
+    set.status = 200;
+
+    return { message: "User updated", user: omit(user, ["password"]) };
   } catch (error) {
-    return res.status(500).json(error);
+    set.status = 500;
+    return { message: "Internal server error", error };
   }
 };
 
-const getUsers: Route = async (req, res) => {
+const getUsers = async ({ query, set }: ElysiaContext) => {
   try {
-    const users = await getAllUsers({
-      attributes: { exclude: ["password"] },
-      offset: Number(req.query.offset || 0),
-      limit: Number(req.query.limit || 10),
-    });
+    const users = await findAllUsers(query);
 
-    return res.status(200).json({ users });
+    return { message: "Get user list successful", ...users };
   } catch (error) {
-    return res.status(500).json(error);
+    set.status = 500;
+    return { message: "Internal server error", error };
   }
 };
 
-const getUser: Route = async (req, res) => {
+const getUser = async ({ params, set }: ElysiaContext) => {
   try {
-    const users = await getUserById(req.params.id, {
-      attributes: { exclude: ["password"] },
-    });
+    const users = await findUserById(params.id);
 
-    return res.status(200).json({ users });
+    set.status = 200;
+    return { message: "Get user successful", users: omit(users, ["password"]) };
   } catch (error) {
-    return res.status(500).json(error);
+    set.status = 500;
+    return { message: "Internal server error" };
   }
 };
 
-const deleteUser: Route = async (req, res) => {
+const deleteUser = async ({ params, set }: ElysiaContext) => {
   try {
-    await deleteUserById(req.params.id);
+    const user = await deleteUserById(params.id);
 
-    return res.status(200).json({ message: "User deleted" });
+    if (!user) {
+      set.status = 404;
+      return { message: "User not found" };
+    }
+
+    set.status = 200;
+    return { message: "User deleted" };
   } catch (error) {
-    return res.status(500).json(error);
+    set.status = 500;
+    return { message: "Internal server error", error };
   }
 };
 

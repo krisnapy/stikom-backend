@@ -4,12 +4,14 @@
   },
   "compilerOptions": {
     /* Language and Environment */
-    "target": "ES6",
+    "target": "ESNext",
     "lib": ["ES6", "DOM"],
     "jsx": "react",
 
     /* Modules */
-    "module": "CommonJS",
+    "module": "ESNext",
+
+    "moduleResolution": "Node",
 
     "outDir": "dist",
     /* Emit */

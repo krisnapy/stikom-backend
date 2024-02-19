@@ -2,12 +2,12 @@ import argon2 from "argon2";
 import pick from "lodash/pick";
 import omit from "lodash/omit";
 
-import { findUserById, findUserByUsername } from "@/db/services/user.services";
 import { ElysiaContext } from "@/types/elysia-context.types";
+import { findAdminByEmail, findAdminById } from "@/db/services";
 
 export type AuthContext = ElysiaContext<{
   body: {
-    username: string;
+    email: string;
     password: string;
   };
 }>;
@@ -20,49 +20,50 @@ const login = async ({
   generateRequiredFields,
 }: AuthContext) => {
   try {
-    const requiredFields = generateRequiredFields(["username", "password"]);
+    const error = generateRequiredFields(["email", "password"]);
 
-    if (requiredFields) return requiredFields;
+    console.log(error);
 
-    const user = await findUserByUsername(body.username);
+    if (error) return error;
 
-    if (!user) {
+    const admin = await findAdminByEmail(body.email);
+
+    if (!admin) {
       set.status = 401;
-      const error = new Error("Invalid username or password!!");
+      const error = new Error("Invalid email or password!!");
       error.name = "InvalidCredentials";
       throw error;
     }
 
-    const matchPass = await argon2.verify(user.password, body.password);
+    const matchPass = await argon2.verify(admin.password, body.password);
 
     if (!matchPass) {
       set.status = 401;
-      const error = new Error("Invalid username or password!!");
+      const error = new Error("Invalid email or password!!");
       error.name = "InvalidCredentials";
       throw error;
     }
 
-    const userObj = pick(user, ["id"]);
+    const adminObj = pick(admin, ["id"]);
 
-    await generateAccessSession(userObj);
-    await generateRefreshSession(userObj);
+    await generateAccessSession(adminObj);
+    await generateRefreshSession(adminObj);
 
     set.status = 200;
 
-    return { message: "Login successful!!", user: omit(user, ["password"]) };
+    return { message: "Login successful!!", admin: omit(admin, ["password"]) };
   } catch (error) {
-    console.error(error);
     set.status = 500;
     return error;
   }
 };
 
-const me = async ({ user, set }: AuthContext) => {
+const me = async ({ admin, set }: AuthContext) => {
   try {
-    const data = await findUserById(user.id);
+    const data = await findAdminById(admin.id);
 
     set.status = 200;
-    return { message: "Success", user: omit(data, ["password"]) };
+    return { message: "Success", admin: omit(data, ["password"]) };
   } catch (error) {
     set.status = 500;
     return error;
@@ -100,23 +101,26 @@ const refreshToken = async ({
 }: AuthContext) => {
   try {
     const refreshToken = String(cookie.refreshToken);
-
     set.status = 401;
+
     if (!refreshToken) throw new Error("Invalid token");
 
     const auth = await jwtRefresh.verify(refreshToken);
 
-    const user = await findUserById(auth.id);
+    const admin = await findAdminById(auth.id);
 
-    if (!user) throw new Error("Invalid token");
+    if (!admin) throw new Error("Invalid token");
 
-    const userObj = pick(user, ["id"]);
+    const adminObj = pick(admin, ["id"]);
 
-    await generateAccessSession(userObj);
+    await generateAccessSession(adminObj);
 
     set.status = 200;
 
-    return { message: "Refresh token success", user: omit(user, ["password"]) };
+    return {
+      message: "Refresh token success",
+      admin: omit(admin, ["password"]),
+    };
   } catch (error) {
     set.status = 500;
     return { message: "Refresh token failed", data: error };

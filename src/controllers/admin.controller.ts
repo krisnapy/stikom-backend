@@ -3,70 +3,89 @@ import { hash } from "argon2";
 import {
   createAdmin,
   deleteAdminById,
-  editAdminById,
-  getAdminById,
-  getAllAdmins,
-} from "@/services/admin.services";
-import { Route } from "@/types/route.types";
+  updateAdminById,
+  findAdminById,
+  findAllAdmins,
+} from "@/db/services";
+import { excludeAttributes } from "@/db/helpers/exclude-attributes";
+import { ElysiaContext } from "@/types/elysia-context.types";
+import { InferResultType } from "@/types/drizzle.types";
 
-const createNewAdmin: Route = async (req, res) => {
+type AdminContext = ElysiaContext<{ body: InferResultType<"admins"> }>;
+
+const createNewAdmin = async ({ body, set }: AdminContext) => {
   try {
-    const hashPass = await hash(req.body.password);
+    const hashPass = await hash(body.password);
 
-    const user = await createAdmin({
-      ...req.body,
+    const admin = await createAdmin({
+      ...body,
       password: hashPass,
     });
 
-    return res.status(201).json({ user: user.setAttributes("password", "") });
+    set.status = 201;
+
+    return {
+      message: "Admin created successfully",
+      admin: excludeAttributes<"admins">(admin, ["password"]),
+    };
   } catch (error) {
-    return res.status(500).json(error);
+    set.status = 500;
+    return { message: "Internal server error", error };
   }
 };
 
-const updateAdmin: Route = async (req, res) => {
+const updateAdmin = async ({ body, params, set }: AdminContext) => {
   try {
-    const user = await editAdminById(req.body, req.params.id);
+    const admin = await updateAdminById(body, params.id);
 
-    return res.status(200).json({ user });
+    set.status = 200;
+
+    return {
+      message: "Admin updated successfully",
+      admin: excludeAttributes<"admins">(admin, ["password"]),
+    };
   } catch (error) {
-    return res.status(500).json(error);
+    set.status = 500;
+    return { message: "Internal server error", error };
   }
 };
 
-const getAdmins: Route = async (req, res) => {
+const getAdmins = async ({ query, set }: AdminContext) => {
   try {
-    const users = await getAllAdmins({
-      attributes: { exclude: ["password"] },
-      offset: Number(req.query.offset || 0),
-      limit: Number(req.query.limit || 10),
-    });
+    const admins = await findAllAdmins(query);
 
-    return res.status(200).json({ users });
+    set.status = 200;
+
+    return { message: "Admins fetched successfully", ...admins };
   } catch (error) {
-    return res.status(500).json(error);
+    set.status = 500;
+    return { message: "Internal server error", error };
   }
 };
 
-const getAdmin: Route = async (req, res) => {
+const getAdmin = async ({ params, set }: AdminContext) => {
   try {
-    const users = await getAdminById(req.params.id, {
-      attributes: { exclude: ["password"] },
-    });
+    const admin = await findAdminById(params.id);
 
-    return res.status(200).json({ users });
+    set.status = 200;
+
+    return { message: "Admin fetched successfully", admin };
   } catch (error) {
-    return res.status(500).json(error);
+    set.status = 500;
+    return { message: "Internal server error", error };
   }
 };
 
-const deleteAdmin: Route = async (req, res) => {
+const deleteAdmin = async ({ params, set }: AdminContext) => {
   try {
-    await deleteAdminById(req.params.id);
+    await deleteAdminById(params.id);
 
-    return res.status(200).json({ message: "Admin deleted" });
+    set.status = 200;
+
+    return { message: "Admin deleted" };
   } catch (error) {
-    return res.status(500).json(error);
+    set.status = 500;
+    return { message: "Internal server error", error };
   }
 };
 

@@ -1,17 +1,16 @@
+import { Elysia } from "elysia";
+
 import AdminController from "@/controllers/admin.controller";
-import { loginMiddleware } from "@/middlewares/auth.middleware";
-import express from "express";
+import { isAdminAuthenticated } from "@/middlewares/auth.middleware";
 
-const router = express.Router();
+export default (app: Elysia) => {
+  return app.use(isAdminAuthenticated).group("/admin/admins", (group) => {
+    group.get("", AdminController.getAdmins);
+    group.get("/:id", AdminController.getAdmin);
+    group.put("/:id", AdminController.updateAdmin);
+    group.delete("/:id", AdminController.deleteAdmin);
+    group.post("", AdminController.createNewAdmin);
 
-router.get("/admin/admins", loginMiddleware, AdminController.getAdmins);
-router.get("/admin/admins/:id", loginMiddleware, AdminController.getAdmin);
-router.put("/admin/admins/:id", loginMiddleware, AdminController.updateAdmin);
-router.delete(
-  "/admin/admins/:id",
-  loginMiddleware,
-  AdminController.deleteAdmin
-);
-router.post("/admin/admins", loginMiddleware, AdminController.createNewAdmin);
-
-export default router;
+    return group;
+  });
+};

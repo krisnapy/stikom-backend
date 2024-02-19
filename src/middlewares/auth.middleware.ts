@@ -1,69 +1,76 @@
-import jwt from "jsonwebtoken";
+import { findAdminById, findUserById } from "@/db/services";
+import { jwtAccessSetup } from "@/routes/helpers/auth.setup";
+import { Elysia } from "elysia";
 
-import { Route } from "@/types/route.types";
-import { ACCESS_TOKEN_SECRET } from "@/env";
-import { getUserById } from "@/services/user.services";
-import { UserAttributes } from "@/models/user.model";
-import { AdminAttributes } from "@/models/admin.model";
+export const isUserAuthenticated = (app: Elysia) =>
+  app
+    .use(jwtAccessSetup)
+    .derive(async ({ jwtAccess, set, request: { headers } }) => {
+      const authorization = headers.get("authorization");
 
-export const loginMiddleware: Route = async (req, res, next) => {
-  try {
-    if (!req.headers.authorization) {
-      return res
-        .status(401)
-        .json({ message: "You're not authorized to access this" });
-    }
+      if (!authorization) {
+        set.status = 401;
+        throw Error("You are not authorized to access this");
+      }
 
-    const token = req.headers.authorization.split(" ").pop();
+      const token = authorization.split(" ").pop();
 
-    const auth = jwt.verify(token, ACCESS_TOKEN_SECRET) as UserAttributes;
+      if (!token) {
+        set.status = 401;
+        throw Error("You are not authorized to access this");
+      }
 
-    const user = await getUserById(auth.id);
+      const payload = await jwtAccess.verify(token);
 
-    if (!user) {
-      return res
-        .status(401)
-        .json({ message: "You're not authorized to access this" });
-    }
+      if (!payload) {
+        set.status = 401;
+        throw Error("You are not authorized to access this");
+      }
 
-    res.locals.auth = auth;
+      const { id } = payload;
 
-    return next();
-  } catch (error) {
-    res.status(401).json({ message: "You're not authorized to access this" });
-  }
-};
+      const user = await findUserById(id);
 
-export const adminMiddleware: Route = async (req, res, next) => {
-  try {
-    if (!req.headers.authorization) {
-      return res
-        .status(401)
-        .json({ message: "You're not authorized to access this" });
-    }
+      if (!user) {
+        set.status = 401;
+        throw Error("You are not authorized to access this");
+      }
 
-    const token = req.headers.authorization.split(" ").pop();
+      return { user };
+    });
 
-    const auth = jwt.verify(token, ACCESS_TOKEN_SECRET) as AdminAttributes;
+export const isAdminAuthenticated = (app: Elysia) =>
+  app
+    .use(jwtAccessSetup)
+    .derive(async ({ jwtAccess, set, request: { headers } }) => {
+      const authorization = headers.get("authorization");
 
-    const user = await getUserById(auth.id);
+      if (!authorization) {
+        set.status = 401;
+        throw Error("You are not authorized to access this");
+      }
 
-    if (!user) {
-      return res
-        .status(401)
-        .json({ message: "You're not authorized to access this" });
-    }
+      const token = authorization.split(" ").pop();
 
-    if (user.roleId !== 1) {
-      return res
-        .status(401)
-        .json({ message: "You're not authorized to access this" });
-    }
+      if (!token) {
+        set.status = 401;
+        throw Error("You are not authorized to access this");
+      }
 
-    res.locals.auth = auth;
+      const payload = await jwtAccess.verify(token);
+      if (!payload) {
+        set.status = 401;
+        throw Error("You are not authorized to access this");
+      }
 
-    return next();
-  } catch (error) {
-    res.status(401).json({ message: "You're not authorized to access this" });
-  }
-};
+      const { id } = payload;
+
+      const admin = await findAdminById(id);
+
+      if (!admin) {
+        set.status = 401;
+        throw Error("You are not authorized to access this");
+      }
+
+      return { admin };
+    });

@@ -1,12 +1,10 @@
-import { Response } from "express";
-
 export type ErrorType = {
   status?: number;
   message?: string;
   kind?: string;
 };
 
-export const errorHandler = (err?: ErrorType, res?: Response) => {
+export const errorHandler = (err?: ErrorType) => {
   let statusCode = 500;
   let message = "You're not authorized to access this";
   let kind = "Internal Server Error";
@@ -22,8 +20,6 @@ export const errorHandler = (err?: ErrorType, res?: Response) => {
   if (err.kind) {
     kind = err.kind;
   }
-
-  console.error({ kind, message });
 
   switch (statusCode) {
     case 400:
@@ -42,5 +38,5 @@ export const errorHandler = (err?: ErrorType, res?: Response) => {
       kind = "Internal Server Error";
   }
 
-  res.status(statusCode).json({ kind, message });
+  return { kind, message };
 };
