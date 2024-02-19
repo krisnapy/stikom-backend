@@ -1,13 +1,19 @@
 {
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  },
   "compilerOptions": {
     /* Language and Environment */
-    "target": "ES6",
+    "target": "ESNext",
     "lib": ["ES6", "DOM"],
     "jsx": "react",
 
     /* Modules */
-    "module": "CommonJS",
+    "module": "ESNext",
 
+    "moduleResolution": "Node",
+
+    "outDir": "dist",
     /* Emit */
     "noEmit": true,
 
@@ -23,6 +29,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "typeRoots": ["./global.d.ts", "./node_modules/@types"]
-  }
+    "typeRoots": ["./global.d.ts", "./node_modules/@types"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+
+  "include": ["**/*.ts", "**/*.tsx", "./src"]
 }
