@@ -1,5 +1,5 @@
 import omit from "lodash/omit";
-import { hash } from "argon2";
+import { Argon2id } from "oslo/password";
 
 import {
   createUser,
@@ -11,12 +11,14 @@ import {
 import { ElysiaContext } from "@/types/elysia-context.types";
 import { InferResultType } from "@/types/drizzle.types";
 
+const argon2 = new Argon2id();
+
 const createNewUser = async ({
   body,
   set,
 }: ElysiaContext<{ body: InferResultType<"users"> }>) => {
   try {
-    const hashPass = await hash(body.password);
+    const hashPass = await argon2.hash(body.password);
 
     const user = await createUser({
       ...body,
