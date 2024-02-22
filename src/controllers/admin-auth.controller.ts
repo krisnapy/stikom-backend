@@ -1,9 +1,11 @@
-import argon2 from "argon2";
 import pick from "lodash/pick";
 import omit from "lodash/omit";
+import { Argon2id as Argon2 } from "oslo/password";
 
 import { ElysiaContext } from "@/types/elysia-context.types";
 import { findAdminByEmail, findAdminById } from "@/db/services";
+
+const argon2 = new Argon2();
 
 export type AuthContext = ElysiaContext<{
   body: {

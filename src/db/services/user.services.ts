@@ -3,6 +3,7 @@ import { uuidv7 } from "uuidv7";
 
 import {
   InferInsertType,
+  InferResultType,
   InferUpdateType,
   TSchema,
 } from "@/types/drizzle.types";
@@ -12,6 +13,7 @@ import { db } from "..";
 import { users } from "../schemas";
 import { getDataList } from "../helpers/get-data-list";
 import { includeWith } from "../helpers/include-attributes";
+import { excludeAttributes } from "../helpers/exclude-attributes";
 
 export const userRelation = {
   lecture: {
@@ -35,11 +37,16 @@ export const userRelation = {
   },
 };
 
-export const findUserById = async (id: string) => {
-  return await db.query.users.findFirst({
+export const findUserById = async (
+  id: string,
+  exclude?: Array<keyof InferResultType<"users">>
+) => {
+  const user = await db.query.users.findFirst({
     where: eq(users.id, id),
     with: userRelation,
   });
+
+  return excludeAttributes<"users">(user, exclude);
 };
 
 export const findUserByUsername = async (username: string) => {

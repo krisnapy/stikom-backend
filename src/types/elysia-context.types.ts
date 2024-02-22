@@ -17,7 +17,7 @@ export interface ElysiaContext<NewContext extends Partial<Context> = {}>
   jwtRefresh: JwtPayload;
 
   generateAccessSession: (
-    auth: Partial<Admin> | Partial<User>,
+    auth: Partial<Admin | Admin[]> | Partial<User | User[]>,
     stored?: boolean
   ) => Promise<{
     accessToken: string;

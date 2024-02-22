@@ -17,7 +17,6 @@
     "@babel/register": "^7.23.7",
     "@elysiajs/jwt": "^0.8.0",
     "@types/node": "^20.11.17",
-    "argon2": "^0.31.2",
     "dayjs": "^1.11.10",
     "dotenv": "^16.0.3",
     "drizzle-orm": "^0.29.3",

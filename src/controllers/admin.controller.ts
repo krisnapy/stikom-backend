@@ -1,4 +1,4 @@
-import { hash } from "argon2";
+import { Argon2id as Argon2 } from "oslo/password";
 
 import {
   createAdmin,
@@ -13,9 +13,11 @@ import { InferResultType } from "@/types/drizzle.types";
 
 type AdminContext = ElysiaContext<{ body: InferResultType<"admins"> }>;
 
+const argon2 = new Argon2();
+
 const createNewAdmin = async ({ body, set }: AdminContext) => {
   try {
-    const hashPass = await hash(body.password);
+    const hashPass = await argon2.hash(body.password);
 
     const admin = await createAdmin({
       ...body,

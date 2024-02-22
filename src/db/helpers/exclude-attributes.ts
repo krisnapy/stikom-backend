@@ -7,7 +7,8 @@ export const excludeAttributes = <T extends keyof TSchema>(
   data: BuildQueryResult<TSchema, TSchema[T], any>,
   exclude: Array<keyof InferResultType<T>>
 ) => {
-  if (Array.isArray(data)) return data.map((item) => omit(item, exclude));
+  if (Array.isArray(data))
+    return data.map((item) => omit(item, exclude) as InferResultType<T>);
 
-  return omit(data, exclude);
+  return omit(data, exclude) as InferResultType<T>;
 };

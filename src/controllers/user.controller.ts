@@ -71,7 +71,7 @@ const getUsers = async ({ query, set }: ElysiaContext) => {
 
 const getUser = async ({ params, set }: ElysiaContext) => {
   try {
-    const users = await findUserById(params.id);
+    const users = await findUserById(params.id, ["password"]);
 
     set.status = 200;
     return { message: "Get user successful", users: omit(users, ["password"]) };
