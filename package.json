@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "bun --watch src/index.ts",
-    "build": "bun build src/index.ts",
-    "start": "NODE_ENV=production bun src/index.ts",
+    "build": "bun build src/index.ts  --outdir ./build --target bun",
+    "start": "NODE_ENV=production bun run build/index.js",
     "build-tsc": "tsc -p index.ts --outdir dist",
     "apply-migration": "bun drizzle-kit push:pg",
     "generate-migration": "bun drizzle-kit generate:pg",
