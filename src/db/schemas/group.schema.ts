@@ -8,10 +8,10 @@ import { groupMembers } from './group-member.schema';
 import { users } from './user.schema';
 
 export const groups = pgTable('groups', {
-  uuid: uuid('uuid').primaryKey().default(uuidv7()),
+  id: uuid('id').primaryKey().default(uuidv7()).$defaultFn(uuidv7),
   name: varchar('name', { length: 100 }).unique().notNull(),
   description: text('description'),
-  createdBy: uuid('created_by').references(() => users.uuid),
+  createdBy: uuid('created_by').references(() => users.id),
 
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
   updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow(),

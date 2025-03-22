@@ -10,9 +10,9 @@ import { users } from './user.schema';
 export const roleEnum = pgEnum('role', ['creator', 'admin', 'member']);
 
 export const groupMembers = pgTable('group_members', {
-  uuid: uuid('uuid').primaryKey().default(uuidv7()),
-  groupId: uuid('group_id').references(() => groups.uuid),
-  userId: uuid('user_id').references(() => users.uuid),
+  id: uuid('id').primaryKey().default(uuidv7()).$defaultFn(uuidv7),
+  groupId: uuid('group_id').references(() => groups.id),
+  userId: uuid('user_id').references(() => users.id),
   role: roleEnum('role').notNull().default('member'),
 
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
@@ -22,11 +22,11 @@ export const groupMembers = pgTable('group_members', {
 export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
   group: one(groups, {
     fields: [groupMembers.groupId],
-    references: [groups.uuid],
+    references: [groups.id],
   }),
   user: one(users, {
     fields: [groupMembers.userId],
-    references: [users.uuid],
+    references: [users.id],
   }),
 }));
 

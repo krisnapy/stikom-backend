@@ -1,5 +1,4 @@
 import { eq } from 'drizzle-orm';
-import { uuidv7 } from 'uuidv7';
 
 import {
   InferInsertType,
@@ -16,18 +15,18 @@ import { users } from '../schemas';
 export const userRelation = {
   groups: {
     columns: {
-      uuid: true,
+      id: true,
       name: true,
     },
   },
 };
 
-export const findUserByUuid = async (
-  uuid: string,
+export const findUserById = async (
+  id: string,
   exclude?: Array<keyof InferResultType<'users'>>,
 ) => {
   const user = await db.query.users.findFirst({
-    where: eq(users.uuid, uuid),
+    where: eq(users.id, id),
   });
 
   return excludeAttributes<'users'>(user, exclude);
@@ -55,27 +54,21 @@ export const findAllUsers = async (pagination?: Pagination<'users'>) => {
 };
 
 export const createUser = async (data: InferInsertType<'users'>) => {
-  const [user] = await db
-    .insert(users)
-    .values({
-      uuid: uuidv7(),
-      ...data,
-    })
-    .returning();
+  const [user] = await db.insert(users).values(data).returning();
 
   return user;
 };
 
-export const updateUserByUuid = async (
+export const updateUserById = async (
   data: InferUpdateType<'users'>,
-  uuid: string,
+  id: string,
 ) => {
-  const user = await db.update(users).set(data).where(eq(users.uuid, uuid));
+  const user = await db.update(users).set(data).where(eq(users.id, id));
 
   return user;
 };
 
-export const deleteUserByUuid = async (uuid: string) => {
-  const [user] = await db.delete(users).where(eq(users.uuid, uuid)).returning();
+export const deleteUserById = async (id: string) => {
+  const [user] = await db.delete(users).where(eq(users.id, id)).returning();
   return user;
 };

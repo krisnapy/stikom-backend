@@ -3,9 +3,9 @@ import { Argon2id as Argon2 } from 'oslo/password';
 import { excludeAttributes } from '@/db/helpers/exclude-attributes';
 import {
   createAdmin,
-  deleteAdminByUuid,
+  deleteAdminById,
   updateAdminById,
-  findAdminByUuid,
+  findAdminById,
   findAllAdmins,
 } from '@/db/services';
 import { InferResultType } from '@/types/drizzle.types';
@@ -67,7 +67,7 @@ const getAdmins = async ({ query, set }: AdminContext) => {
 
 const getAdmin = async ({ params, set }: AdminContext) => {
   try {
-    const admin = await findAdminByUuid(params.id);
+    const admin = await findAdminById(params.id);
 
     set.status = 200;
 
@@ -80,7 +80,7 @@ const getAdmin = async ({ params, set }: AdminContext) => {
 
 const deleteAdmin = async ({ params, set }: AdminContext) => {
   try {
-    await deleteAdminByUuid(params.id);
+    await deleteAdminById(params.id);
 
     set.status = 200;
 

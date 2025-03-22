@@ -1,33 +1,31 @@
-import { uuidv7 } from 'uuidv7';
-
 import { InferInsertType } from '@/types/drizzle.types';
 
 import { db } from '..';
 import { groups } from '../schemas';
+import { findUserByEmail } from '../services';
 
-import { firstUserUUID, secondUserUUID } from './users.seeder';
-
-export const firstGroupUUID = uuidv7();
-export const secondGroupUUID = uuidv7();
-
-const groupSeeds = (): Array<InferInsertType<'groups'>> => [
+const groupSeeds = (
+  firstUserId: string,
+  secondUserId: string,
+): Array<InferInsertType<'groups'>> => [
   {
-    uuid: firstGroupUUID,
     name: 'Group 1',
     description: 'Group 1 description',
-    createdBy: firstUserUUID,
+    createdBy: firstUserId,
   },
   {
-    uuid: secondGroupUUID,
     name: 'Group 2',
     description: 'Group 2 description',
-    createdBy: secondUserUUID,
+    createdBy: secondUserId,
   },
 ];
 
 export const groupSeeder = async () => {
   try {
-    const values = groupSeeds();
+    const firstUser = await findUserByEmail('user@test.test');
+    const secondUser = await findUserByEmail('user2@test.test');
+
+    const values = groupSeeds(firstUser.id, secondUser.id);
 
     await db.insert(groups).values(values);
 

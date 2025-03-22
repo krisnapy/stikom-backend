@@ -3,7 +3,7 @@ import { t } from 'elysia';
 export const groupMemberCollectionModel = t.Array(
   t.Object({
     user: t.Object({
-      uuid: t.String(),
+      id: t.String(),
       fullName: t.String(),
       email: t.String(),
       phoneNumber: t.String(),
@@ -18,7 +18,7 @@ export const groupMemberCollectionModel = t.Array(
 );
 
 export const groupModel = t.Object({
-  uuid: t.String(),
+  id: t.String(),
   name: t.String(),
   description: t.String(),
   createdBy: t.String(),

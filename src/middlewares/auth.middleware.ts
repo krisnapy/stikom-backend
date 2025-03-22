@@ -1,6 +1,6 @@
 import { Elysia, error } from 'elysia';
 
-import { findAdminByUuid, findUserByUuid } from '@/db/services';
+import { findAdminById, findUserById } from '@/db/services';
 import { jwtAccessSetup } from '@/routes/helpers/auth.setup';
 
 export const isUserAuthenticated = (app: Elysia) =>
@@ -34,9 +34,9 @@ export const isUserAuthenticated = (app: Elysia) =>
         });
       }
 
-      const { uuid } = payload;
+      const { id } = payload;
 
-      const user = await findUserByUuid(uuid);
+      const user = await findUserById(id);
 
       if (!user) {
         return error(401, {
@@ -54,7 +54,6 @@ export const isAdminAuthenticated = (app: Elysia) =>
     .derive(async ({ jwtAccess, request: { headers } }) => {
       const authorization = headers.get('authorization');
 
-      console.log('admin', authorization);
 
       if (!authorization) {
         return error(401, {
@@ -80,9 +79,9 @@ export const isAdminAuthenticated = (app: Elysia) =>
         });
       }
 
-      const { uuid } = payload;
+      const { id } = payload;
 
-      const admin = await findAdminByUuid(uuid);
+      const admin = await findAdminById(id);
 
       if (!admin) {
         return error(401, {

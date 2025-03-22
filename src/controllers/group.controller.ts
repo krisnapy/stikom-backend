@@ -2,16 +2,16 @@ import { error } from 'elysia';
 
 import {
   findAllGroups,
-  findGroupByUuid,
-  updateGroupByUuid,
-  deleteGroupByUuid,
+  findGroupById,
+  updateGroupById,
+  deleteGroupById,
 } from '@/db/services';
 import {
-  addMemberToGroupByUuid,
+  addMemberToGroupById,
   createGroup,
   findAllMembersOfGroup,
   findGroupsByUserId,
-  removeMemberFromGroupByUuid,
+  removeMemberFromGroupById,
 } from '@/db/services/group.services';
 import { InferResultType } from '@/types/drizzle.types';
 import { ElysiaContext } from '@/types/elysia-context.types';
@@ -23,7 +23,7 @@ const createNewGroup = async ({ body, set }: GroupContext) => {
   try {
     const group = await createGroup(body);
 
-    await addMemberToGroupByUuid(group.uuid, [body.createdBy], 'creator');
+    await addMemberToGroupById(group.id, [body.createdBy], 'creator');
 
     set.status = 201;
 
@@ -35,7 +35,7 @@ const createNewGroup = async ({ body, set }: GroupContext) => {
 
 const updateGroup = async ({ body, params, set }: GroupContext) => {
   try {
-    const group = await updateGroupByUuid(body, params.id);
+    const group = await updateGroupById(body, params.id);
 
     if (!group) {
       set.status = 404;
@@ -62,7 +62,7 @@ const getGroups = async ({ query }: ElysiaContext) => {
 
 const getGroup = async ({ params, set }: ElysiaContext) => {
   try {
-    const group = await findGroupByUuid(params.id);
+    const group = await findGroupById(params.id);
 
     set.status = 200;
     return { message: 'Get group successful', group };
@@ -73,7 +73,7 @@ const getGroup = async ({ params, set }: ElysiaContext) => {
 
 const getMyGroup = async ({ user, set }: ElysiaContext) => {
   try {
-    const groups = await findGroupsByUserId(user.uuid);
+    const groups = await findGroupsByUserId(user.id);
 
     set.status = 200;
     return { message: 'Get my group successful', ...groups };
@@ -90,14 +90,13 @@ const findAllGroupMembers = async ({ params, set }: ElysiaContext) => {
     set.status = 200;
     return { message: 'Get all group members successful', ...groupMembers };
   } catch (err) {
-    console.log(err);
     return error(500, { message: 'Internal server error', error: err });
   }
 };
 
 const addMemberToGroup = async ({ params, body, set }: UserIdsContext) => {
   try {
-    const group = await addMemberToGroupByUuid(params.id, body.userIds);
+    const group = await addMemberToGroupById(params.id, body.userIds);
 
     set.status = 200;
     return { message: 'Add member to group successful', group };
@@ -108,7 +107,7 @@ const addMemberToGroup = async ({ params, body, set }: UserIdsContext) => {
 
 const removeMemberFromGroup = async ({ params, body, set }: UserIdsContext) => {
   try {
-    const group = await removeMemberFromGroupByUuid(params.id, body.userIds);
+    const group = await removeMemberFromGroupById(params.id, body.userIds);
 
     if (!group) {
       set.status = 404;
@@ -124,14 +123,14 @@ const removeMemberFromGroup = async ({ params, body, set }: UserIdsContext) => {
 
 const joinGroup = async ({ params, set, user }: ElysiaContext) => {
   try {
-    const group = await findGroupByUuid(params.id);
+    const group = await findGroupById(params.id);
 
     if (!group) {
       set.status = 404;
       return { message: 'Group not found' };
     }
 
-    const groupMember = await addMemberToGroupByUuid(params.id, [user.uuid]);
+    const groupMember = await addMemberToGroupById(params.id, [user.id]);
 
     set.status = 200;
     return { message: 'Join group successful', ...groupMember };
@@ -142,16 +141,14 @@ const joinGroup = async ({ params, set, user }: ElysiaContext) => {
 
 const leaveGroup = async ({ params, set, user }: ElysiaContext) => {
   try {
-    const group = await findGroupByUuid(params.id);
+    const group = await findGroupById(params.id);
 
     if (!group) {
       set.status = 404;
       return { message: 'Group not found' };
     }
 
-    const groupMember = await removeMemberFromGroupByUuid(params.id, [
-      user.uuid,
-    ]);
+    const groupMember = await removeMemberFromGroupById(params.id, [user.id]);
 
     set.status = 200;
     return { message: 'Leave group successful', ...groupMember };
@@ -162,14 +159,14 @@ const leaveGroup = async ({ params, set, user }: ElysiaContext) => {
 
 export const deleteGroup = async ({ params, set }: ElysiaContext) => {
   try {
-    const group = await deleteGroupByUuid(params.id);
+    const group = await deleteGroupById(params.id);
     const groupMembers = await findAllMembersOfGroup(params.id);
 
     if (!group) {
       return error(404, { message: 'Group not found' });
     }
 
-    await removeMemberFromGroupByUuid(
+    await removeMemberFromGroupById(
       params.id,
       groupMembers.groupMembers.map((member) => member.userId),
     );

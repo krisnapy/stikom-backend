@@ -4,9 +4,9 @@ import { Argon2id } from 'oslo/password';
 import {
   createUser,
   findAllUsers,
-  findUserByUuid,
-  updateUserByUuid,
-  deleteUserByUuid,
+  findUserById,
+  updateUserById,
+  deleteUserById,
 } from '@/db/services';
 import { InferResultType } from '@/types/drizzle.types';
 import { ElysiaContext } from '@/types/elysia-context.types';
@@ -35,7 +35,7 @@ const createNewUser = async ({ body, set }: UserContext) => {
 
 const updateUser = async ({ body, params, set }: UserContext) => {
   try {
-    const user = await updateUserByUuid(body, params.id);
+    const user = await updateUserById(body, params.id);
 
     if (!user) {
       set.status = 404;
@@ -64,7 +64,7 @@ const getUsers = async ({ query, set }: ElysiaContext) => {
 
 const getUser = async ({ params, set }: ElysiaContext) => {
   try {
-    const users = await findUserByUuid(params.id, ['password']);
+    const users = await findUserById(params.id, ['password']);
 
     set.status = 200;
     return { message: 'Get user successful', users: omit(users, ['password']) };
@@ -76,7 +76,7 @@ const getUser = async ({ params, set }: ElysiaContext) => {
 
 const deleteUser = async ({ params, set }: ElysiaContext) => {
   try {
-    const user = await deleteUserByUuid(params.id);
+    const user = await deleteUserById(params.id);
 
     if (!user) {
       set.status = 404;

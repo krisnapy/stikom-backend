@@ -10,7 +10,7 @@ export const adminTypes = pgEnum('admin', [
 ]);
 
 export const admins = pgTable('admins', {
-  uuid: uuid('uuid').primaryKey().default(uuidv7()),
+  id: uuid('id').primaryKey().default(uuidv7()).$defaultFn(uuidv7),
   username: varchar('username', { length: 50 }).unique().notNull(),
   email: varchar('email', { length: 50 }).unique().notNull(),
   phoneNumber: varchar('phone_number', { length: 15 }).unique().notNull(),

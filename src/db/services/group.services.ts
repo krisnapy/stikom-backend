@@ -1,5 +1,4 @@
 import { and, eq, inArray } from 'drizzle-orm';
-import { uuidv7 } from 'uuidv7';
 
 import {
   InferInsertType,
@@ -17,7 +16,7 @@ import { groupMembers, groups } from '../schemas';
 export const userColumns = {
   user: {
     columns: {
-      uuid: true,
+      id: true,
       fullName: true,
       email: true,
       phoneNumber: true,
@@ -34,7 +33,7 @@ export const userColumns = {
 export const groupRelation = {
   groupMembers: {
     columns: {
-      uuid: true,
+      id: true,
       role: true,
     },
     with: userColumns,
@@ -42,14 +41,14 @@ export const groupRelation = {
 };
 
 /**
- * Find a group by its UUID
+ * Find a group by its ID
  */
-export const findGroupByUuid = async (
-  uuid: string,
+export const findGroupById = async (
+  id: string,
   exclude?: Array<keyof InferResultType<'groups'>>,
 ) => {
   const group = await db.query.groups.findFirst({
-    where: eq(groups.uuid, uuid),
+    where: eq(groups.id, id),
     with: groupRelation,
   });
 
@@ -73,7 +72,7 @@ export const findGroupsByUserId = async (
     data: groups,
     pagination,
     options: {
-      where: inArray(groups.uuid, groupIds),
+      where: inArray(groups.id, groupIds),
       with: groupRelation,
     },
   });
@@ -103,35 +102,29 @@ export const createGroup = async (data: InferInsertType<'groups'>) => {
   const [group] = await db
     .insert(groups)
     .overridingSystemValue()
-    .values({
-      uuid: uuidv7(),
-      ...data,
-    })
+    .values(data)
     .returning();
 
   return group;
 };
 
 /**
- * Update a group by UUID
+ * Update a group by ID
  */
-export const updateGroupByUuid = async (
+export const updateGroupById = async (
   data: InferUpdateType<'groups'>,
-  uuid: string,
+  id: string,
 ) => {
-  const group = await db.update(groups).set(data).where(eq(groups.uuid, uuid));
+  const group = await db.update(groups).set(data).where(eq(groups.id, id));
 
   return group;
 };
 
 /**
- * Delete a group by UUID
+ * Delete a group by ID
  */
-export const deleteGroupByUuid = async (uuid: string) => {
-  const [group] = await db
-    .delete(groups)
-    .where(eq(groups.uuid, uuid))
-    .returning();
+export const deleteGroupById = async (id: string) => {
+  const [group] = await db.delete(groups).where(eq(groups.id, id)).returning();
 
   return group;
 };
@@ -139,13 +132,13 @@ export const deleteGroupByUuid = async (uuid: string) => {
 /**
  * Add a member to a group
  */
-export const addMemberToGroupByUuid = async (
+export const addMemberToGroupById = async (
   groupId: string,
   userId: string[],
   role: 'creator' | 'admin' | 'member' = 'member',
 ) => {
   const group = await db.query.groups.findFirst({
-    where: eq(groups.uuid, groupId),
+    where: eq(groups.id, groupId),
     with: groupRelation,
   });
 
@@ -163,7 +156,7 @@ export const addMemberToGroupByUuid = async (
 /**
  * Remove a member from a group
  */
-export const removeMemberFromGroupByUuid = async (
+export const removeMemberFromGroupById = async (
   groupId: string,
   userId: string[],
 ) => {

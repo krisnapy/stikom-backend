@@ -2,7 +2,7 @@ import { Context, Cookie } from 'elysia';
 
 import { Admin, User } from '@/db/schemas';
 
-import { JwtPayload } from './jwt.types';
+import { JWT } from './jwt.types';
 
 // Define function types separately
 export type GenerateAccessSessionFn = (
@@ -10,7 +10,7 @@ export type GenerateAccessSessionFn = (
   stored?: boolean
 ) => Promise<{
   accessToken: string;
-  payload: JwtPayload;
+  payload: JWT;
 }>;
 
 export type GenerateRefreshSessionFn = (
@@ -18,7 +18,7 @@ export type GenerateRefreshSessionFn = (
   store?: boolean
 ) => Promise<{
   refreshToken: string;
-  payload: JwtPayload;
+  payload: JWT;
 }>;
 
 export type GenerateRequiredFieldsFn = (
@@ -34,8 +34,8 @@ export interface ElysiaContext<T = unknown> extends Context {
   set: Context['set'];
   cookie: Record<string, Cookie<string>>;
 
-  jwtAccess: JwtPayload;
-  jwtRefresh: JwtPayload;
+  jwtAccess: JWT;
+  jwtRefresh: JWT;
 
   generateAccessSession: GenerateAccessSessionFn;
   generateRefreshSession: GenerateRefreshSessionFn;

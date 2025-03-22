@@ -3,7 +3,7 @@ import omit from 'lodash/omit';
 import pick from 'lodash/pick';
 import { Argon2id as Argon2 } from 'oslo/password';
 
-import { findUserByEmail, findUserByUuid } from '@/db/services/user.services';
+import { findUserByEmail, findUserById } from '@/db/services/user.services';
 import { ElysiaContext } from '@/types/elysia-context.types';
 
 const argon2 = new Argon2();
@@ -44,7 +44,7 @@ const login = async ({
       });
     }
 
-    const userObj = pick(user, ['uuid']);
+    const userObj = pick(user, ['ud']);
 
     await generateAccessSession(userObj);
     await generateRefreshSession(userObj);
@@ -61,7 +61,7 @@ const login = async ({
 
 const me = async ({ user, set }: AuthContext) => {
   try {
-    const data = await findUserByUuid(user.uuid);
+    const data = await findUserById(user.id);
 
     set.status = 200;
     return { message: 'Success', user: omit(data, ['password']) };
@@ -71,7 +71,7 @@ const me = async ({ user, set }: AuthContext) => {
   }
 };
 
-const logout = ({ set, cookie }: AuthContext) => {
+const logout = ({ set, cookie, jwtRefresh }: AuthContext) => {
   try {
     const refreshToken = cookie.refreshToken;
 
@@ -108,11 +108,11 @@ const refreshToken = async ({
 
     const auth = await jwtRefresh.verify(refreshToken);
 
-    const user = await findUserByUuid(auth.uuid);
+    const user = await findUserById(auth.id);
 
     if (!user) throw new Error('Invalid token');
 
-    const userObj = pick(user, ['uuid']);
+    const userObj = pick(user, ['id']);
 
     await generateAccessSession(userObj);
 

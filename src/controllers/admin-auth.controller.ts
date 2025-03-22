@@ -2,7 +2,7 @@ import omit from 'lodash/omit';
 import pick from 'lodash/pick';
 import { Argon2id as Argon2 } from 'oslo/password';
 
-import { findAdminByEmail, findAdminByUuid } from '@/db/services';
+import { findAdminByEmail, findAdminById } from '@/db/services';
 import { ElysiaContext } from '@/types/elysia-context.types';
 
 const argon2 = new Argon2();
@@ -58,7 +58,7 @@ const login = async ({
 
 const me = async ({ admin, set }: AuthContext) => {
   try {
-    const data = await findAdminByUuid(admin.uuid);
+    const data = await findAdminById(admin.id);
 
     set.status = 200;
     return { message: 'Success', admin: omit(data, ['password']) };
@@ -105,7 +105,7 @@ const refreshToken = async ({
 
     const auth = await jwtRefresh.verify(refreshToken);
 
-    const admin = await findAdminByUuid(auth.uuid);
+    const admin = await findAdminById(auth.id);
 
     if (!admin) throw new Error('Invalid token');
 
