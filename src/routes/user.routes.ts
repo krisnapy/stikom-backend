@@ -3,7 +3,7 @@ import { Elysia } from "elysia";
 import UserController from "@/controllers/user.controller";
 import { isAdminAuthenticated } from "@/middlewares/auth.middleware";
 
-import { queryCollectionModel } from "./helpers/models/query";
+import { queryCollectionModel } from "./models/query";
 
 export default (app: Elysia) => {
   return app.group("/admin/users", (group) => {

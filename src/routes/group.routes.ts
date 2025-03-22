@@ -5,13 +5,17 @@ import {
   isAdminAuthenticated,
   isUserAuthenticated,
 } from "@/middlewares/auth.middleware";
-import { queryCollectionModel } from "./helpers/models/query";
-import { groupCollectionModel, groupModel } from "./helpers/models/group.model";
+import { queryCollectionModel } from "./models/query";
+import {
+  groupCollectionModel,
+  groupMemberCollectionModel,
+  groupModel,
+} from "./models/group.model";
 import {
   collectionResponse,
   errorResponse,
   modelResponse,
-} from "./helpers/models/response";
+} from "./models/response";
 
 const groupCollectionResponse = {
   200: collectionResponse({ groups: groupCollectionModel }),
@@ -20,6 +24,11 @@ const groupCollectionResponse = {
 
 const groupResponse = {
   200: modelResponse({ group: groupModel }),
+  500: errorResponse,
+};
+
+const groupMemberCollectionResponse = {
+  200: collectionResponse({ groupMembers: groupMemberCollectionModel }),
   500: errorResponse,
 };
 
@@ -54,6 +63,7 @@ export default (app: Elysia) => {
       response: groupResponse,
     });
     group.get("/:id/members", GroupController.findAllGroupMembers, {
+      response: groupMemberCollectionResponse,
       query: queryCollectionModel,
     });
     group.post("/:id/members/join", GroupController.joinGroup, {
