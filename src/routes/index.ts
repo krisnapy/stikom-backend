@@ -1,24 +1,28 @@
-import { InferResultType } from "@/types/drizzle.types";
-import AuthRoutes from "./auth.routes";
-import { jwtAccessSetup, jwtRefreshSetup } from "./helpers/auth.setup";
-import UserRoutes from "./user.routes";
-
-import { Elysia } from "elysia";
 import { JWTPayloadSpec } from "@elysiajs/jwt";
+import { Elysia, ElysiaConfig } from "elysia";
+
 import { Admin, User } from "@/db/schemas";
 import { generateRequiredFields as requiredFields } from "@/utils/generate-required-field";
+
+import authRoutes from "./auth.routes";
+import { jwtAccessSetup, jwtRefreshSetup } from "./helpers/auth.setup";
+import userRoutes from "./user.routes";
+import groupRoutes from "./group.routes";
+
+type Auth = Partial<Admin> | Partial<User>;
+
+// const routes = [authRoutes, userRoutes, groupRoutes];
+
+const routes = (app: Elysia<"/api/v1">) => {
+  return app.use(authRoutes).use(userRoutes).use(groupRoutes);
+};
 
 export default (app: Elysia) =>
   app
     .use(jwtAccessSetup)
     .use(jwtRefreshSetup)
     .derive(({ jwtAccess, set, jwtRefresh, cookie, body }) => ({
-      generateAccessSession: async (
-        auth:
-          | Partial<InferResultType<"admins">>
-          | Partial<InferResultType<"users">>,
-        stored: boolean = true
-      ) => {
+      generateAccessSession: async (auth: Auth, stored: boolean = true) => {
         const accessToken = await jwtAccess.sign(auth);
 
         const accessTokenDecode = (await jwtAccess.verify(
@@ -34,10 +38,7 @@ export default (app: Elysia) =>
 
         return { accessToken, payload: accessTokenDecode };
       },
-      generateRefreshSession: async (
-        auth: Partial<Admin> | Partial<User>,
-        stored: boolean = true
-      ) => {
+      generateRefreshSession: async (auth: Auth, stored: boolean = true) => {
         const refreshToken = await jwtRefresh.sign(auth);
 
         const refreshTokenDecode = (await jwtRefresh.verify(
@@ -63,4 +64,4 @@ export default (app: Elysia) =>
         if (!!Object.entries(error).length) return error;
       },
     }))
-    .group("/api/v1", (routes) => routes.use(AuthRoutes).use(UserRoutes));
+    .group("/api/v1", (route) => routes(route));

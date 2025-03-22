@@ -2,9 +2,9 @@ import { Argon2id as Argon2 } from "oslo/password";
 
 import {
   createAdmin,
-  deleteAdminById,
+  deleteAdminByUuid,
   updateAdminById,
-  findAdminById,
+  findAdminByUuid,
   findAllAdmins,
 } from "@/db/services";
 import { excludeAttributes } from "@/db/helpers/exclude-attributes";
@@ -67,7 +67,7 @@ const getAdmins = async ({ query, set }: AdminContext) => {
 
 const getAdmin = async ({ params, set }: AdminContext) => {
   try {
-    const admin = await findAdminById(params.id);
+    const admin = await findAdminByUuid(params.id);
 
     set.status = 200;
 
@@ -80,7 +80,7 @@ const getAdmin = async ({ params, set }: AdminContext) => {
 
 const deleteAdmin = async ({ params, set }: AdminContext) => {
   try {
-    await deleteAdminById(params.id);
+    await deleteAdminByUuid(params.id);
 
     set.status = 200;
 

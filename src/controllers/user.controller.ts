@@ -4,9 +4,9 @@ import { Argon2id } from "oslo/password";
 import {
   createUser,
   findAllUsers,
-  findUserById,
-  updateUserById,
-  deleteUserById,
+  findUserByUuid,
+  updateUserByUuid,
+  deleteUserByUuid,
 } from "@/db/services";
 import { ElysiaContext } from "@/types/elysia-context.types";
 import { InferResultType } from "@/types/drizzle.types";
@@ -22,8 +22,6 @@ const createNewUser = async ({
 
     const user = await createUser({
       ...body,
-      roleId: Number(body.roleId),
-      religionId: Number(body.religionId),
       password: hashPass,
     });
 
@@ -44,7 +42,7 @@ const updateUser = async ({
   body: InferResultType<"users">;
 }>) => {
   try {
-    const user = await updateUserById(body, params.id);
+    const user = await updateUserByUuid(body, params.id);
 
     if (!user) {
       set.status = 404;
@@ -73,7 +71,7 @@ const getUsers = async ({ query, set }: ElysiaContext) => {
 
 const getUser = async ({ params, set }: ElysiaContext) => {
   try {
-    const users = await findUserById(params.id, ["password"]);
+    const users = await findUserByUuid(params.id, ["password"]);
 
     set.status = 200;
     return { message: "Get user successful", users: omit(users, ["password"]) };
@@ -85,7 +83,7 @@ const getUser = async ({ params, set }: ElysiaContext) => {
 
 const deleteUser = async ({ params, set }: ElysiaContext) => {
   try {
-    const user = await deleteUserById(params.id);
+    const user = await deleteUserByUuid(params.id);
 
     if (!user) {
       set.status = 404;

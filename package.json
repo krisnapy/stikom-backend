@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/lodash": "^4.17.16",
     "@types/pg": "^8.11.0",
     "drizzle-kit": "^0.20.14",
     "tsconfig-paths": "^4.2.0"

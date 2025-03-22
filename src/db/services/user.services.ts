@@ -16,50 +16,37 @@ import { includeWith } from "../helpers/include-attributes";
 import { excludeAttributes } from "../helpers/exclude-attributes";
 
 export const userRelation = {
-  lecture: {
+  groups: {
     columns: {
-      avatar: true,
-      fullName: true,
-      email: true,
-      phoneNumber: true,
-      gender: true,
-    },
-  },
-  religion: {
-    columns: {
-      name: true,
-    },
-  },
-  role: {
-    columns: {
+      uuid: true,
       name: true,
     },
   },
 };
 
-export const findUserById = async (
-  id: string,
+export const findUserByUuid = async (
+  uuid: string,
   exclude?: Array<keyof InferResultType<"users">>
 ) => {
   const user = await db.query.users.findFirst({
-    where: eq(users.id, id),
+    where: eq(users.uuid, uuid),
     with: userRelation,
   });
 
   return excludeAttributes<"users">(user, exclude);
 };
 
-export const findUserByUsername = async (username: string) => {
-  return await db.query.users.findFirst({
-    where: eq(users.username, username),
-    with: userRelation,
-  });
-};
+// export const findUserByUsername = async (username: string) => {
+//   return await db.query.users.findFirst({
+//     where: eq(users.username, username),
+//     with: userRelation,
+//   });
+// };
 
 export const findUserByEmail = async (email: string) => {
   return await db.query.users.findFirst({
     where: eq(users.email, email),
-    with: includeWith<TSchema["users"]>(users, ["id", "username", "email"]),
+    with: includeWith<TSchema["users"]>(users, ["uuid", "fullName", "email"]),
   });
 };
 
@@ -74,7 +61,7 @@ export const createUser = async (data: InferInsertType<"users">) => {
   const [user] = await db
     .insert(users)
     .values({
-      id: uuidv7(),
+      uuid: uuidv7(),
       ...data,
     })
     .returning();
@@ -82,14 +69,14 @@ export const createUser = async (data: InferInsertType<"users">) => {
   return user;
 };
 
-export const updateUserById = async (
+export const updateUserByUuid = async (
   data: InferUpdateType<"users">,
-  id: string
+  uuid: string
 ) => {
-  return await db.update(users).set(data).where(eq(users.id, id));
+  return await db.update(users).set(data).where(eq(users.uuid, uuid));
 };
 
-export const deleteUserById = async (id: string) => {
-  const [user] = await db.delete(users).where(eq(users.id, id)).returning();
+export const deleteUserByUuid = async (uuid: string) => {
+  const [user] = await db.delete(users).where(eq(users.uuid, uuid)).returning();
   return user;
 };

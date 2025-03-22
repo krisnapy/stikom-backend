@@ -9,7 +9,7 @@ export const jwtAccessSetup = new Elysia({
   jwt({
     name: "jwtAccess",
     schema: t.Object({
-      id: t.Optional(t.String()),
+      uuid: t.Optional(t.String()),
     }),
     secret: ACCESS_TOKEN_SECRET!,
     exp: "5m",
@@ -22,7 +22,7 @@ export const jwtRefreshSetup = new Elysia({
   jwt({
     name: "jwtRefresh",
     schema: t.Object({
-      id: t.Optional(t.String()),
+      uuid: t.Optional(t.String()),
     }),
     secret: REFRESH_TOKEN_SECRET!,
     exp: "7d",

@@ -3,7 +3,7 @@ import omit from "lodash/omit";
 import { Argon2id as Argon2 } from "oslo/password";
 
 import { ElysiaContext } from "@/types/elysia-context.types";
-import { findAdminByEmail, findAdminById } from "@/db/services";
+import { findAdminByEmail, findAdminByUuid } from "@/db/services";
 
 const argon2 = new Argon2();
 
@@ -62,7 +62,7 @@ const login = async ({
 
 const me = async ({ admin, set }: AuthContext) => {
   try {
-    const data = await findAdminById(admin.id);
+    const data = await findAdminByUuid(admin.uuid);
 
     set.status = 200;
     return { message: "Success", admin: omit(data, ["password"]) };
@@ -109,11 +109,11 @@ const refreshToken = async ({
 
     const auth = await jwtRefresh.verify(refreshToken);
 
-    const admin = await findAdminById(auth.id);
+    const admin = await findAdminByUuid(auth.uuid);
 
     if (!admin) throw new Error("Invalid token");
 
-    const adminObj = pick(admin, ["id"]);
+    const adminObj = pick(admin, ["uuid"]);
 
     await generateAccessSession(adminObj);
 

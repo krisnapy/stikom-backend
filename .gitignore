@@ -132,3 +132,6 @@ dist
 
 # Build directory
 build
+
+# Drizzle
+drizzle/*

@@ -8,15 +8,9 @@ import { db } from "..";
 import { admins } from "../schemas";
 import { getDataList } from "../helpers/get-data-list";
 
-export const findAdminById = async (id: string) => {
+export const findAdminByUuid = async (uuid: string) => {
   return await db.query.admins.findFirst({
-    where: eq(admins.id, id),
-  });
-};
-
-export const findAdminByUsername = async (username: string) => {
-  return await db.query.admins.findFirst({
-    where: eq(admins.username, username),
+    where: eq(admins.uuid, uuid),
   });
 };
 
@@ -36,7 +30,7 @@ export const createAdmin = async (data: InferInsertType<"admins">) => {
   const [admin] = await db
     .insert(admins)
     .values({
-      id: uuidv7(),
+      uuid: uuidv7(),
       ...data,
     })
     .returning();
@@ -46,11 +40,15 @@ export const createAdmin = async (data: InferInsertType<"admins">) => {
 
 export const updateAdminById = async (
   data: InferUpdateType<"admins">,
-  id: string
+  uuid: string
 ) => {
-  return await db.update(admins).set(data).where(eq(admins.id, id)).returning();
+  return await db
+    .update(admins)
+    .set(data)
+    .where(eq(admins.uuid, uuid))
+    .returning();
 };
 
-export const deleteAdminById = async (id: string) => {
-  return await db.delete(admins).where(eq(admins.id, id));
+export const deleteAdminByUuid = async (uuid: string) => {
+  return await db.delete(admins).where(eq(admins.uuid, uuid));
 };

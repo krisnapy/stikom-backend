@@ -3,12 +3,12 @@ import { JWTPayloadSpec } from "@elysiajs/jwt";
 export type JwtPayload = {
   readonly sign: (
     morePayload: {
-      id?: string;
+      uuid?: string;
     } & JWTPayloadSpec
   ) => Promise<string>;
   readonly verify: (jwt?: string) => Promise<
     {
-      id?: string;
+      uuid?: string;
     } & JWTPayloadSpec
   >;
 };

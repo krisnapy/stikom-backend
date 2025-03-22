@@ -9,9 +9,7 @@ const queryClient = new Pool({
   database: process.env.DATABASE_NAME,
   user: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  ssl: process.env.DATABASE_HOST === "localhost" ? false : true,
 });
 
 export const db = drizzle(queryClient, { schema });

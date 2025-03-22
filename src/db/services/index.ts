@@ -5,3 +5,4 @@ export * from "./course.services";
 // export * from './religion.services'
 // export * from './role.services'
 export * from "./user.services";
+export * from "./group.services";

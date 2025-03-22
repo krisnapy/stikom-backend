@@ -10,7 +10,7 @@ export default defineConfig({
     port: Number(process.env.DATABASE_PORT),
     user: process.env.DATABASE_USERNAME,
   },
-  verbose: true,
-  strict: true,
+  verbose: false,
+  strict: false,
   out: "./drizzle",
 });

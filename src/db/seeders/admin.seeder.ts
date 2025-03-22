@@ -1,4 +1,4 @@
-import argon2 from "argon2";
+import { Argon2id } from "oslo/password";
 import { uuidv7 } from "uuidv7";
 
 import { db } from "..";
@@ -6,9 +6,11 @@ import { admins } from "../schemas";
 
 import { InferInsertType } from "@/types/drizzle.types";
 
+const argon2 = new Argon2id();
+
 const adminSeeds = async (): Promise<Array<InferInsertType<"admins">>> => [
   {
-    id: uuidv7(),
+    uuid: uuidv7(),
     username: "superAdmin",
     email: "superAdmin@test.test",
     password: await argon2.hash("22222222"),
@@ -16,7 +18,7 @@ const adminSeeds = async (): Promise<Array<InferInsertType<"admins">>> => [
     phoneNumber: "0812345678900",
   },
   {
-    id: uuidv7(),
+    uuid: uuidv7(),
     username: "admin",
     email: "admin@test.test",
     password: await argon2.hash("22222222"),
@@ -30,6 +32,8 @@ export const adminSeeder = async () => {
     const values = await adminSeeds();
 
     await db.insert(admins).values(values);
+
+    console.log("User seeder has been executed!");
   } catch (error) {
     console.error(error);
   }

@@ -1,4 +1,4 @@
-import { findAdminById, findUserById } from "@/db/services";
+import { findAdminByUuid, findUserByUuid } from "@/db/services";
 import { jwtAccessSetup } from "@/routes/helpers/auth.setup";
 import { Elysia } from "elysia";
 
@@ -27,9 +27,9 @@ export const isUserAuthenticated = (app: Elysia) =>
         throw Error("You are not authorized to access this");
       }
 
-      const { id } = payload;
+      const { uuid } = payload;
 
-      const user = await findUserById(id);
+      const user = await findUserByUuid(uuid);
 
       if (!user) {
         set.status = 401;
@@ -63,9 +63,9 @@ export const isAdminAuthenticated = (app: Elysia) =>
         throw Error("You are not authorized to access this");
       }
 
-      const { id } = payload;
+      const { uuid } = payload;
 
-      const admin = await findAdminById(id);
+      const admin = await findAdminByUuid(uuid);
 
       if (!admin) {
         set.status = 401;
