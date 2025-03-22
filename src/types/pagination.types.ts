@@ -1,4 +1,4 @@
-import { TSchema } from "./drizzle.types";
+import { TSchema } from './drizzle.types';
 
 export type Pagination<TableName extends keyof TSchema> = {
   limit?: number;
@@ -6,6 +6,6 @@ export type Pagination<TableName extends keyof TSchema> = {
   total?: number;
   page?: number;
   totalPage?: number;
-  direction?: "asc" | "desc";
-  orderBy?: keyof TSchema[TableName]["columns"];
+  direction?: 'asc' | 'desc';
+  orderBy?: keyof TSchema[TableName]['columns'];
 };

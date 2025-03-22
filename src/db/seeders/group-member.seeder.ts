@@ -1,36 +1,35 @@
-import { uuidv7 } from "uuidv7";
+import { uuidv7 } from 'uuidv7';
 
-import { InferInsertType } from "@/types/drizzle.types";
+import { InferInsertType } from '@/types/drizzle.types';
 
-import { firstUserUUID, secondUserUUID } from "./users.seeder";
-import { db } from "..";
-import { groupMembers, groups } from "../schemas";
-import { firstGroupUUID, secondGroupUUID } from "./group.seeder";
+import { db } from '..';
+import { groupMembers, groups } from '../schemas';
 
-const groupMemberSeeds = async (): Promise<
-  Array<InferInsertType<"groupMembers">>
-> => [
+import { firstGroupUUID, secondGroupUUID } from './group.seeder';
+import { firstUserUUID, secondUserUUID } from './users.seeder';
+
+const groupMemberSeeds = (): Array<InferInsertType<'groupMembers'>> => [
   {
     uuid: uuidv7(),
     groupId: firstGroupUUID,
     userId: firstUserUUID,
-    role: "creator",
+    role: 'creator',
   },
   {
     uuid: uuidv7(),
     groupId: secondGroupUUID,
     userId: secondUserUUID,
-    role: "creator",
+    role: 'creator',
   },
 ];
 
 export const groupMemberSeeder = async () => {
   try {
-    const values = await groupMemberSeeds();
+    const values = groupMemberSeeds();
 
     await db.insert(groupMembers).values(values);
 
-    console.log("Group member seeder has been executed!");
+    console.log('Group member seeder has been executed!');
   } catch (error) {
     console.error(error);
   }

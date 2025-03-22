@@ -7,7 +7,7 @@ export type ErrorType = {
 export const errorHandler = (err?: ErrorType) => {
   let statusCode = 500;
   let message = "You're not authorized to access this";
-  let kind = "Internal Server Error";
+  let kind = 'Internal Server Error';
 
   if (err.status) {
     statusCode = err.status;
@@ -23,19 +23,19 @@ export const errorHandler = (err?: ErrorType) => {
 
   switch (statusCode) {
     case 400:
-      kind = "Bad Request";
+      kind = 'Bad Request';
       break;
     case 401:
-      kind = "Unauthorized";
+      kind = 'Unauthorized';
       break;
     case 403:
-      kind = "Forbidden";
+      kind = 'Forbidden';
       break;
     case 404:
-      kind = "Not Found";
+      kind = 'Not Found';
       break;
     default:
-      kind = "Internal Server Error";
+      kind = 'Internal Server Error';
   }
 
   return { kind, message };

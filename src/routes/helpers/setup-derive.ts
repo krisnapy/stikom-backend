@@ -1,8 +1,10 @@
-import { Elysia } from "elysia";
-import { JWTPayloadSpec } from "@elysiajs/jwt";
-import { jwtAccessSetup, jwtRefreshSetup } from "./auth.setup";
-import { Admin, User } from "@/db/schemas";
-import { generateRequiredFields as requiredFields } from "@/utils/generate-required-field";
+import { JWTPayloadSpec } from '@elysiajs/jwt';
+import { Elysia } from 'elysia';
+
+import { Admin, User } from '@/db/schemas';
+import { generateRequiredFields as requiredFields } from '@/utils/generate-required-field';
+
+import { jwtAccessSetup, jwtRefreshSetup } from './auth.setup';
 
 type Auth = Partial<Admin> | Partial<User>;
 
@@ -15,13 +17,13 @@ export const derive = (app: Elysia) => {
         const accessToken = await jwtAccess.sign(auth);
 
         const accessTokenDecode = (await jwtAccess.verify(
-          accessToken
+          accessToken,
         )) as JWTPayloadSpec;
 
         if (stored) {
           set.headers.authorization = accessToken;
-          set.headers["Access-Token-Expires"] = new Date(
-            accessTokenDecode.exp * 1000
+          set.headers['Access-Token-Expires'] = new Date(
+            accessTokenDecode.exp * 1000,
           ).toISOString();
         }
 
@@ -31,14 +33,14 @@ export const derive = (app: Elysia) => {
         const refreshToken = await jwtRefresh.sign(auth);
 
         const refreshTokenDecode = (await jwtRefresh.verify(
-          refreshToken
+          refreshToken,
         )) as JWTPayloadSpec;
 
         if (stored) {
           cookie.refreshToken.set({
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "none",
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'none',
             expires: new Date(refreshTokenDecode.exp * 1000),
             value: refreshToken,
           });
@@ -47,10 +49,10 @@ export const derive = (app: Elysia) => {
         return { refreshToken, payload: refreshTokenDecode };
       },
       generateRequiredFields: (fields: Array<string>) => {
-        const error = requiredFields(body, fields);
+        const error = requiredFields(body as Record<string, unknown>, fields);
 
         set.status = 400;
-        if (!!Object.entries(error).length) return error;
+        if (Object.entries(error).length) return error;
       },
     }));
 };

@@ -2,19 +2,20 @@ import type {
   BuildQueryResult,
   DBQueryConfig,
   ExtractTablesWithRelations,
-} from "drizzle-orm";
-import * as schema from "@/db/schemas";
-import { PgInsertValue, PgUpdateSetSource } from "drizzle-orm/pg-core";
+} from 'drizzle-orm';
+import { PgInsertValue, PgUpdateSetSource } from 'drizzle-orm/pg-core';
+
+import * as schema from '@/db/schemas';
 
 export type Schema = typeof schema;
 export type TSchema = ExtractTablesWithRelations<Schema>;
 
 export type IncludeRelation<TableName extends keyof TSchema> = DBQueryConfig<
-  "one" | "many",
+  'one' | 'many',
   boolean,
   TSchema,
   TSchema[TableName]
->["with"];
+>['with'];
 
 export type InferResultType<
   TableName extends keyof TSchema,

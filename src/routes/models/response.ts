@@ -1,5 +1,5 @@
-import { t } from "elysia";
-import { TArray, TObject, TString, TNumber } from "@sinclair/typebox";
+import { TArray, TObject, TString, TNumber } from '@sinclair/typebox';
+import { t } from 'elysia';
 
 export const errorResponse = t.Object({
   message: t.String(),
@@ -7,7 +7,7 @@ export const errorResponse = t.Object({
 });
 
 export const collectionResponse = (
-  data: Record<string, TArray | TObject | TString | TNumber>
+  data: Record<string, TArray | TObject | TString | TNumber>,
 ) => {
   return t.Object({
     message: t.String(),

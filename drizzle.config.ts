@@ -1,8 +1,8 @@
-import { defineConfig } from "drizzle-kit";
+import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
-  schema: "./src/db/schemas/*",
-  driver: "pg",
+  schema: './src/db/schemas/*',
+  driver: 'pg',
   dbCredentials: {
     database: process.env.DATABASE_NAME,
     host: process.env.DATABASE_HOST,
@@ -12,5 +12,5 @@ export default defineConfig({
   },
   verbose: false,
   strict: false,
-  out: "./drizzle",
+  out: './drizzle',
 });

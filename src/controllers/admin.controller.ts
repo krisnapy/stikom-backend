@@ -1,17 +1,17 @@
-import { Argon2id as Argon2 } from "oslo/password";
+import { Argon2id as Argon2 } from 'oslo/password';
 
+import { excludeAttributes } from '@/db/helpers/exclude-attributes';
 import {
   createAdmin,
   deleteAdminByUuid,
   updateAdminById,
   findAdminByUuid,
   findAllAdmins,
-} from "@/db/services";
-import { excludeAttributes } from "@/db/helpers/exclude-attributes";
-import { ElysiaContext } from "@/types/elysia-context.types";
-import { InferResultType } from "@/types/drizzle.types";
+} from '@/db/services';
+import { InferResultType } from '@/types/drizzle.types';
+import { ElysiaContext } from '@/types/elysia-context.types';
 
-type AdminContext = ElysiaContext<InferResultType<"admins">>;
+type AdminContext = ElysiaContext<InferResultType<'admins'>>;
 
 const argon2 = new Argon2();
 
@@ -27,12 +27,12 @@ const createNewAdmin = async ({ body, set }: AdminContext) => {
     set.status = 201;
 
     return {
-      message: "Admin created successfully",
-      admin: excludeAttributes<"admins">(admin, ["password"]),
+      message: 'Admin created successfully',
+      admin: excludeAttributes<'admins'>(admin, ['password']),
     };
   } catch (error) {
     set.status = 500;
-    return { message: "Internal server error", error };
+    return { message: 'Internal server error', error };
   }
 };
 
@@ -43,12 +43,12 @@ const updateAdmin = async ({ body, params, set }: AdminContext) => {
     set.status = 200;
 
     return {
-      message: "Admin updated successfully",
-      admin: excludeAttributes<"admins">(admin, ["password"]),
+      message: 'Admin updated successfully',
+      admin: excludeAttributes<'admins'>(admin, ['password']),
     };
   } catch (error) {
     set.status = 500;
-    return { message: "Internal server error", error };
+    return { message: 'Internal server error', error };
   }
 };
 
@@ -58,10 +58,10 @@ const getAdmins = async ({ query, set }: AdminContext) => {
 
     set.status = 200;
 
-    return { message: "Admins fetched successfully", ...admins };
+    return { message: 'Admins fetched successfully', ...admins };
   } catch (error) {
     set.status = 500;
-    return { message: "Internal server error", error };
+    return { message: 'Internal server error', error };
   }
 };
 
@@ -71,10 +71,10 @@ const getAdmin = async ({ params, set }: AdminContext) => {
 
     set.status = 200;
 
-    return { message: "Admin fetched successfully", admin };
+    return { message: 'Admin fetched successfully', admin };
   } catch (error) {
     set.status = 500;
-    return { message: "Internal server error", error };
+    return { message: 'Internal server error', error };
   }
 };
 
@@ -84,10 +84,10 @@ const deleteAdmin = async ({ params, set }: AdminContext) => {
 
     set.status = 200;
 
-    return { message: "Admin deleted" };
+    return { message: 'Admin deleted' };
   } catch (error) {
     set.status = 500;
-    return { message: "Internal server error", error };
+    return { message: 'Internal server error', error };
   }
 };
 

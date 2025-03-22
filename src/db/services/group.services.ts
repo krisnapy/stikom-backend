@@ -1,17 +1,17 @@
-import { and, eq, inArray } from "drizzle-orm";
-import { uuidv7 } from "uuidv7";
+import { and, eq, inArray } from 'drizzle-orm';
+import { uuidv7 } from 'uuidv7';
 
 import {
   InferInsertType,
   InferResultType,
   InferUpdateType,
-} from "@/types/drizzle.types";
-import { Pagination } from "@/types/pagination.types";
+} from '@/types/drizzle.types';
+import { Pagination } from '@/types/pagination.types';
 
-import { db } from "..";
-import { groupMembers, groups } from "../schemas";
-import { getDataList } from "../helpers/get-data-list";
-import { excludeAttributes } from "../helpers/exclude-attributes";
+import { db } from '..';
+import { excludeAttributes } from '../helpers/exclude-attributes';
+import { getDataList } from '../helpers/get-data-list';
+import { groupMembers, groups } from '../schemas';
 
 // Define consistent relation object for group queries
 export const userColumns = {
@@ -34,12 +34,8 @@ export const userColumns = {
 export const groupRelation = {
   groupMembers: {
     columns: {
-      uuid: false,
-      groupId: false,
-      userId: false,
-      role: false,
-      createdAt: false,
-      updatedAt: false,
+      uuid: true,
+      role: true,
     },
     with: userColumns,
   },
@@ -50,14 +46,14 @@ export const groupRelation = {
  */
 export const findGroupByUuid = async (
   uuid: string,
-  exclude?: Array<keyof InferResultType<"groups">>
+  exclude?: Array<keyof InferResultType<'groups'>>,
 ) => {
   const group = await db.query.groups.findFirst({
     where: eq(groups.uuid, uuid),
     with: groupRelation,
   });
 
-  return excludeAttributes<"groups">(group, exclude);
+  return excludeAttributes<'groups'>(group, exclude);
 };
 
 /**
@@ -65,7 +61,7 @@ export const findGroupByUuid = async (
  */
 export const findGroupsByUserId = async (
   userId: string,
-  pagination?: Pagination<"groups">
+  pagination?: Pagination<'groups'>,
 ) => {
   const memberGroups = await db.query.groupMembers.findMany({
     where: eq(groupMembers.userId, userId),
@@ -73,25 +69,37 @@ export const findGroupsByUserId = async (
 
   const groupIds = memberGroups.map((member) => member.groupId);
 
-  return await getDataList<"groups">(groups, pagination, {
-    where: inArray(groups.uuid, groupIds),
-    with: groupRelation,
+  const result = await getDataList<'groups'>({
+    data: groups,
+    pagination,
+    options: {
+      where: inArray(groups.uuid, groupIds),
+      with: groupRelation,
+    },
   });
+
+  return result;
 };
 
 /**
  * Find all groups with optional pagination
  */
-export const findAllGroups = async (pagination?: Pagination<"groups">) => {
-  return await getDataList<"groups">(groups, pagination, {
-    with: groupRelation,
+export const findAllGroups = async (pagination?: Pagination<'groups'>) => {
+  const result = await getDataList<'groups'>({
+    data: groups,
+    pagination,
+    options: {
+      with: groupRelation,
+    },
   });
+
+  return result;
 };
 
 /**
  * Create a new group
  */
-export const createGroup = async (data: InferInsertType<"groups">) => {
+export const createGroup = async (data: InferInsertType<'groups'>) => {
   const [group] = await db
     .insert(groups)
     .overridingSystemValue()
@@ -108,10 +116,12 @@ export const createGroup = async (data: InferInsertType<"groups">) => {
  * Update a group by UUID
  */
 export const updateGroupByUuid = async (
-  data: InferUpdateType<"groups">,
-  uuid: string
+  data: InferUpdateType<'groups'>,
+  uuid: string,
 ) => {
-  return await db.update(groups).set(data).where(eq(groups.uuid, uuid));
+  const group = await db.update(groups).set(data).where(eq(groups.uuid, uuid));
+
+  return group;
 };
 
 /**
@@ -122,6 +132,7 @@ export const deleteGroupByUuid = async (uuid: string) => {
     .delete(groups)
     .where(eq(groups.uuid, uuid))
     .returning();
+
   return group;
 };
 
@@ -131,7 +142,7 @@ export const deleteGroupByUuid = async (uuid: string) => {
 export const addMemberToGroupByUuid = async (
   groupId: string,
   userId: string[],
-  role: "creator" | "admin" | "member" = "member"
+  role: 'creator' | 'admin' | 'member' = 'member',
 ) => {
   const group = await db.query.groups.findFirst({
     where: eq(groups.uuid, groupId),
@@ -139,12 +150,14 @@ export const addMemberToGroupByUuid = async (
   });
 
   if (!group) {
-    throw new Error("Group not found");
+    throw new Error('Group not found');
   }
 
-  return await db
+  const groupMember = await db
     .insert(groupMembers)
     .values(userId.map((userId) => ({ groupId, userId, role })));
+
+  return groupMember;
 };
 
 /**
@@ -152,16 +165,18 @@ export const addMemberToGroupByUuid = async (
  */
 export const removeMemberFromGroupByUuid = async (
   groupId: string,
-  userId: string[]
+  userId: string[],
 ) => {
-  return await db
+  const groupMember = await db
     .delete(groupMembers)
     .where(
       and(
         eq(groupMembers.groupId, groupId),
-        inArray(groupMembers.userId, userId)
-      )
+        inArray(groupMembers.userId, userId),
+      ),
     );
+
+  return groupMember;
 };
 
 /**
@@ -169,10 +184,16 @@ export const removeMemberFromGroupByUuid = async (
  */
 export const findAllMembersOfGroup = async (
   groupId: string,
-  pagination?: Pagination<"groupMembers">
+  pagination?: Pagination<'groupMembers'>,
 ) => {
-  return await getDataList<"groupMembers">(groupMembers, pagination, {
-    where: eq(groupMembers.groupId, groupId),
-    ...groupRelation.groupMembers,
+  const members = await getDataList<'groupMembers'>({
+    data: groupMembers,
+    pagination,
+    options: {
+      where: eq(groupMembers.groupId, groupId),
+      with: userColumns,
+    },
   });
+
+  return members;
 };

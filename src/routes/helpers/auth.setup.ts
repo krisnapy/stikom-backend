@@ -1,30 +1,30 @@
-import jwt from "@elysiajs/jwt";
-import { Elysia, t } from "elysia";
+import jwt from '@elysiajs/jwt';
+import { Elysia, t } from 'elysia';
 
-import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from "@/env";
+import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from '@/env';
 
 export const jwtAccessSetup = new Elysia({
-  name: "jwtAccess",
+  name: 'jwtAccess',
 }).use(
   jwt({
-    name: "jwtAccess",
+    name: 'jwtAccess',
     schema: t.Object({
       uuid: t.Optional(t.String()),
     }),
     secret: ACCESS_TOKEN_SECRET!,
-    exp: "1d",
-  })
+    exp: '1d',
+  }),
 );
 
 export const jwtRefreshSetup = new Elysia({
-  name: "jwtRefresh",
+  name: 'jwtRefresh',
 }).use(
   jwt({
-    name: "jwtRefresh",
+    name: 'jwtRefresh',
     schema: t.Object({
       uuid: t.Optional(t.String()),
     }),
     secret: REFRESH_TOKEN_SECRET!,
-    exp: "7d",
-  })
+    exp: '7d',
+  }),
 );

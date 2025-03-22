@@ -1,10 +1,10 @@
-import pick from "lodash/pick";
-import { Argon2id as Argon2 } from "oslo/password";
-import omit from "lodash/omit";
+import { error } from 'elysia';
+import omit from 'lodash/omit';
+import pick from 'lodash/pick';
+import { Argon2id as Argon2 } from 'oslo/password';
 
-import { findUserByEmail, findUserByUuid } from "@/db/services/user.services";
-import { ElysiaContext } from "@/types/elysia-context.types";
-import { error } from "elysia";
+import { findUserByEmail, findUserByUuid } from '@/db/services/user.services';
+import { ElysiaContext } from '@/types/elysia-context.types';
 
 const argon2 = new Argon2();
 
@@ -21,7 +21,7 @@ const login = async ({
   generateRequiredFields,
 }: AuthContext) => {
   try {
-    const requiredFields = generateRequiredFields(["email", "password"]);
+    const requiredFields = generateRequiredFields(['email', 'password']);
 
     if (requiredFields) return requiredFields;
 
@@ -29,28 +29,29 @@ const login = async ({
 
     if (!user) {
       return error(401, {
-        message: "Invalid username or password!!",
-        name: "InvalidCredentials",
+        message: 'Invalid username or password!!',
+        name: 'InvalidCredentials',
       });
     }
+    
 
     const matchPass = await argon2.verify(user.password, body.password);
 
     if (!matchPass) {
       return error(401, {
-        message: "Invalid username or password!!",
-        name: "InvalidCredentials",
+        message: 'Invalid username or password!!',
+        name: 'InvalidCredentials',
       });
     }
 
-    const userObj = pick(user, ["uuid"]);
+    const userObj = pick(user, ['uuid']);
 
     await generateAccessSession(userObj);
     await generateRefreshSession(userObj);
 
     set.status = 200;
 
-    return { message: "Login successful!!", user: omit(user, ["password"]) };
+    return { message: 'Login successful!!', user: omit(user, ['password']) };
   } catch (error) {
     console.error(error);
     set.status = 500;
@@ -63,14 +64,14 @@ const me = async ({ user, set }: AuthContext) => {
     const data = await findUserByUuid(user.uuid);
 
     set.status = 200;
-    return { message: "Success", user: omit(data, ["password"]) };
+    return { message: 'Success', user: omit(data, ['password']) };
   } catch (error) {
     set.status = 500;
     return error;
   }
 };
 
-const logout = async ({ set, cookie }: AuthContext) => {
+const logout = ({ set, cookie }: AuthContext) => {
   try {
     const refreshToken = cookie.refreshToken;
 
@@ -78,18 +79,18 @@ const logout = async ({ set, cookie }: AuthContext) => {
 
     cookie.refreshToken.set({
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none',
       expires: new Date(0),
-      value: "",
+      value: '',
     });
 
     set.status = 200;
 
-    return { message: "Logout success" };
+    return { message: 'Logout success' };
   } catch (error) {
     set.status = 500;
-    return { message: "Logout failed", data: error };
+    return { message: 'Logout failed', data: error };
   }
 };
 
@@ -103,24 +104,24 @@ const refreshToken = async ({
     const refreshToken = String(cookie.refreshToken);
 
     set.status = 401;
-    if (!refreshToken) throw new Error("Invalid token");
+    if (!refreshToken) throw new Error('Invalid token');
 
     const auth = await jwtRefresh.verify(refreshToken);
 
     const user = await findUserByUuid(auth.uuid);
 
-    if (!user) throw new Error("Invalid token");
+    if (!user) throw new Error('Invalid token');
 
-    const userObj = pick(user, ["uuid"]);
+    const userObj = pick(user, ['uuid']);
 
     await generateAccessSession(userObj);
 
     set.status = 200;
 
-    return { message: "Refresh token success", user: omit(user, ["password"]) };
+    return { message: 'Refresh token success', user: omit(user, ['password']) };
   } catch (error) {
     set.status = 500;
-    return { message: "Refresh token failed", data: error };
+    return { message: 'Refresh token failed', data: error };
   }
 };
 

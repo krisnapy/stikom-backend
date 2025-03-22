@@ -1,4 +1,4 @@
-import { JWTPayloadSpec } from "@elysiajs/jwt";
+import { JWTPayloadSpec } from '@elysiajs/jwt';
 
 export type JwtPayload = {
   readonly sign: (

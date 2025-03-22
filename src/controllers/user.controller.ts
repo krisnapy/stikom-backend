@@ -1,5 +1,5 @@
-import omit from "lodash/omit";
-import { Argon2id } from "oslo/password";
+import omit from 'lodash/omit';
+import { Argon2id } from 'oslo/password';
 
 import {
   createUser,
@@ -7,13 +7,13 @@ import {
   findUserByUuid,
   updateUserByUuid,
   deleteUserByUuid,
-} from "@/db/services";
-import { ElysiaContext } from "@/types/elysia-context.types";
-import { InferResultType } from "@/types/drizzle.types";
+} from '@/db/services';
+import { InferResultType } from '@/types/drizzle.types';
+import { ElysiaContext } from '@/types/elysia-context.types';
 
 const argon2 = new Argon2id();
 
-type UserContext = ElysiaContext<InferResultType<"users">>;
+type UserContext = ElysiaContext<InferResultType<'users'>>;
 
 const createNewUser = async ({ body, set }: UserContext) => {
   try {
@@ -26,10 +26,10 @@ const createNewUser = async ({ body, set }: UserContext) => {
 
     set.status = 201;
 
-    return { message: "User created", user: omit(user, ["password"]) };
+    return { message: 'User created', user: omit(user, ['password']) };
   } catch (error) {
     set.status = 500;
-    return { message: "Internal server error" };
+    return { message: 'Internal server error' };
   }
 };
 
@@ -39,15 +39,15 @@ const updateUser = async ({ body, params, set }: UserContext) => {
 
     if (!user) {
       set.status = 404;
-      return { message: "User not found" };
+      return { message: 'User not found' };
     }
 
     set.status = 200;
 
-    return { message: "User updated", user: omit(user, ["password"]) };
+    return { message: 'User updated', user: omit(user, ['password']) };
   } catch (error) {
     set.status = 500;
-    return { message: "Internal server error", error };
+    return { message: 'Internal server error', error };
   }
 };
 
@@ -55,22 +55,22 @@ const getUsers = async ({ query, set }: ElysiaContext) => {
   try {
     const users = await findAllUsers(query);
 
-    return { message: "Get user list successful", ...users };
+    return { message: 'Get user list successful', ...users };
   } catch (error) {
     set.status = 500;
-    return { message: "Internal server error", error };
+    return { message: 'Internal server error', error };
   }
 };
 
 const getUser = async ({ params, set }: ElysiaContext) => {
   try {
-    const users = await findUserByUuid(params.id, ["password"]);
+    const users = await findUserByUuid(params.id, ['password']);
 
     set.status = 200;
-    return { message: "Get user successful", users: omit(users, ["password"]) };
+    return { message: 'Get user successful', users: omit(users, ['password']) };
   } catch (error) {
     set.status = 500;
-    return { message: "Internal server error" };
+    return { message: 'Internal server error' };
   }
 };
 
@@ -80,14 +80,14 @@ const deleteUser = async ({ params, set }: ElysiaContext) => {
 
     if (!user) {
       set.status = 404;
-      return { message: "User not found" };
+      return { message: 'User not found' };
     }
 
     set.status = 200;
-    return { message: "User deleted" };
+    return { message: 'User deleted' };
   } catch (error) {
     set.status = 500;
-    return { message: "Internal server error", error };
+    return { message: 'Internal server error', error };
   }
 };
 

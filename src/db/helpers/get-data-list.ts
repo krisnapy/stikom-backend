@@ -1,16 +1,18 @@
-import camelCase from "lodash/camelCase";
-import { PgTableWithColumns } from "drizzle-orm/pg-core";
-import { SQL, asc, desc, getTableName, sql } from "drizzle-orm";
+import { SQL, asc, desc, getTableName, sql } from 'drizzle-orm';
+import { PgTableWithColumns } from 'drizzle-orm/pg-core';
+import camelCase from 'lodash/camelCase';
 
-import { Pagination } from "@/types/pagination.types";
-import { db } from "..";
-import { excludeAttributes } from "./exclude-attributes";
 import {
   IncludeRelation,
   InferResultType,
   Schema,
   TSchema,
-} from "@/types/drizzle.types";
+} from '@/types/drizzle.types';
+import { Pagination } from '@/types/pagination.types';
+
+import { db } from '..';
+
+import { excludeAttributes } from './exclude-attributes';
 
 // Define base pagination metadata type
 type PaginationMetadata = {
@@ -18,13 +20,14 @@ type PaginationMetadata = {
   totalPage: number;
   currentPage: number;
   perPage: number;
-  direction: "asc" | "desc";
+  direction: 'asc' | 'desc';
   orderBy: string;
 };
 
+// Type for function parameters
 type GetDataListProps<T extends keyof TSchema> = {
   data: Schema[T];
-  pagination: Pagination<T>;
+  pagination?: Pagination<T>;
   options?: {
     with?: IncludeRelation<T>;
     where?: SQL;
@@ -33,11 +36,18 @@ type GetDataListProps<T extends keyof TSchema> = {
   };
 };
 
-export const getDataList = async <T extends keyof TSchema>(
-  props: GetDataListProps<T>
-) => {
-  const { data, pagination, options } = props;
-  const { direction = "asc", orderBy = "createdAt" } = pagination || {};
+// Type for function return value
+export type GetDataListResult<T extends keyof TSchema> = PaginationMetadata & {
+  [key in T]: Array<InferResultType<T>>;
+};
+
+// The function itself with proper typing
+export const getDataList = async <T extends keyof TSchema>({
+  data,
+  pagination,
+  options = {},
+}: GetDataListProps<T>): Promise<GetDataListResult<T>> => {
+  const { direction = 'asc', orderBy = 'createdAt' } = pagination || {};
 
   const limit = Number(pagination?.limit) || 10;
   const offset = Number(pagination?.page) || 1;
@@ -45,7 +55,7 @@ export const getDataList = async <T extends keyof TSchema>(
   const tableName: T = camelCase(getTableName(data)) as T;
 
   const orderByColumn =
-    direction === "asc"
+    direction === 'asc'
       ? asc((data as any)[orderBy])
       : desc((data as any)[orderBy]);
 
@@ -71,7 +81,5 @@ export const getDataList = async <T extends keyof TSchema>(
     perPage: limit,
     direction,
     orderBy,
-  } as PaginationMetadata & {
-    [key in T]: Array<InferResultType<T>>;
-  };
+  } as GetDataListResult<T>;
 };

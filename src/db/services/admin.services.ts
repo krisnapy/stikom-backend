@@ -1,32 +1,39 @@
-import { eq } from "drizzle-orm";
-import { uuidv7 } from "uuidv7";
+import { eq } from 'drizzle-orm';
+import { uuidv7 } from 'uuidv7';
 
-import { InferInsertType, InferUpdateType } from "@/types/drizzle.types";
-import { Pagination } from "@/types/pagination.types";
+import { InferInsertType, InferUpdateType } from '@/types/drizzle.types';
+import { Pagination } from '@/types/pagination.types';
 
-import { db } from "..";
-import { admins } from "../schemas";
-import { getDataList } from "../helpers/get-data-list";
+import { db } from '..';
+import { getDataList } from '../helpers/get-data-list';
+import { admins } from '../schemas';
 
 export const findAdminByUuid = async (uuid: string) => {
-  return await db.query.admins.findFirst({
+  const admin = await db.query.admins.findFirst({
     where: eq(admins.uuid, uuid),
   });
+  return admin;
 };
 
 export const findAdminByEmail = async (email: string) => {
-  return await db.query.admins.findFirst({
+  const admin = await db.query.admins.findFirst({
     where: eq(admins.email, email),
   });
+  return admin;
 };
 
-export const findAllAdmins = async (pagination?: Pagination<"admins">) => {
-  return await getDataList<"admins">(admins, pagination, {
-    exclude: ["password"],
+export const findAllAdmins = async (pagination?: Pagination<'admins'>) => {
+  const result = await getDataList<'admins'>({
+    data: admins,
+    pagination,
+    options: {
+      exclude: ['password'],
+    },
   });
+  return result;
 };
 
-export const createAdmin = async (data: InferInsertType<"admins">) => {
+export const createAdmin = async (data: InferInsertType<'admins'>) => {
   const [admin] = await db
     .insert(admins)
     .values({
@@ -39,16 +46,18 @@ export const createAdmin = async (data: InferInsertType<"admins">) => {
 };
 
 export const updateAdminById = async (
-  data: InferUpdateType<"admins">,
-  uuid: string
+  data: InferUpdateType<'admins'>,
+  uuid: string,
 ) => {
-  return await db
+  const result = await db
     .update(admins)
     .set(data)
     .where(eq(admins.uuid, uuid))
     .returning();
+  return result;
 };
 
 export const deleteAdminByUuid = async (uuid: string) => {
-  return await db.delete(admins).where(eq(admins.uuid, uuid));
+  const result = await db.delete(admins).where(eq(admins.uuid, uuid));
+  return result;
 };

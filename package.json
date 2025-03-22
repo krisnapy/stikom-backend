@@ -10,7 +10,9 @@
     "apply-migration": "bun drizzle-kit push:pg",
     "generate-migration": "bun drizzle-kit generate:pg",
     "apply-seeders": "bun src/db/seeders/index.ts",
-    "revert-seeders": "bun src/db/seeders/clear-table.ts"
+    "revert-seeders": "bun src/db/seeders/clear-table.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@babel/core": "^7.23.9",
@@ -31,11 +33,19 @@
     "uuidv7": "^0.6.3"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.23.0",
     "@types/bun": "latest",
     "@types/lodash": "^4.17.16",
     "@types/pg": "^8.11.0",
+    "@typescript-eslint/eslint-plugin": "^8.27.0",
+    "@typescript-eslint/parser": "^8.27.0",
     "drizzle-kit": "^0.20.14",
-    "tsconfig-paths": "^4.2.0"
+    "eslint": "^9.23.0",
+    "eslint-import-resolver-typescript": "^4.2.2",
+    "eslint-plugin-import": "^2.31.0",
+    "tsconfig-paths": "^4.2.0",
+    "typescript-eslint": "^8.27.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

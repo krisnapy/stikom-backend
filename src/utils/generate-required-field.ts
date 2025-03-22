@@ -1,4 +1,7 @@
-export const generateRequiredFields = (body: any, fields: string[]) => {
+export const generateRequiredFields = (
+  body: Record<string, unknown>,
+  fields: string[],
+) => {
   return fields.reduce((acc, field) => {
     if (!body[field]) {
       acc.data = {
@@ -10,7 +13,7 @@ export const generateRequiredFields = (body: any, fields: string[]) => {
           },
         }),
       };
-      acc.message = "Please input all required fields";
+      acc.message = 'Please input all required fields';
     }
 
     return acc;

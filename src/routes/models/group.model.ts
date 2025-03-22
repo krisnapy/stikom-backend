@@ -1,4 +1,4 @@
-import { t } from "elysia";
+import { t } from 'elysia';
 
 export const groupMemberCollectionModel = t.Array(
   t.Object({
@@ -14,7 +14,7 @@ export const groupMemberCollectionModel = t.Array(
       description: t.Union([t.String(), t.Null()]),
       status: t.Union([t.String(), t.Null()]),
     }),
-  })
+  }),
 );
 
 export const groupModel = t.Object({
