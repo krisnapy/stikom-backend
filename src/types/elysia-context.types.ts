@@ -3,15 +3,14 @@ import { Context } from "elysia";
 import { JwtPayload } from "./jwt.types";
 import { Admin, User } from "@/db/schemas";
 
-interface Params {
+// Make ElysiaContext properly extend Context
+export interface ElysiaContext<T = any> extends Context {
   params: { id: string };
-}
-
-export interface ElysiaContext<NewContext extends Partial<Context> = {}>
-  extends Omit<Context<NewContext>, "params">,
-    Params {
   user?: User;
   admin?: Admin;
+  body: T;
+  set: Context["set"];
+  cookie: Record<string, any>;
 
   jwtAccess: JwtPayload;
   jwtRefresh: JwtPayload;

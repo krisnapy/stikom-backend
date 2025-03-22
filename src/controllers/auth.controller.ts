@@ -4,14 +4,13 @@ import omit from "lodash/omit";
 
 import { findUserByEmail, findUserByUuid } from "@/db/services/user.services";
 import { ElysiaContext } from "@/types/elysia-context.types";
+import { error } from "elysia";
 
 const argon2 = new Argon2();
 
 export type AuthContext = ElysiaContext<{
-  body: {
-    email: string;
-    password: string;
-  };
+  email: string;
+  password: string;
 }>;
 
 const login = async ({
@@ -29,19 +28,19 @@ const login = async ({
     const user = await findUserByEmail(body.email);
 
     if (!user) {
-      set.status = 401;
-      const error = new Error("Invalid username or password!!");
-      error.name = "InvalidCredentials";
-      throw error;
+      return error(401, {
+        message: "Invalid username or password!!",
+        name: "InvalidCredentials",
+      });
     }
 
     const matchPass = await argon2.verify(user.password, body.password);
 
     if (!matchPass) {
-      set.status = 401;
-      const error = new Error("Invalid username or password!!");
-      error.name = "InvalidCredentials";
-      throw error;
+      return error(401, {
+        message: "Invalid username or password!!",
+        name: "InvalidCredentials",
+      });
     }
 
     const userObj = pick(user, ["uuid"]);

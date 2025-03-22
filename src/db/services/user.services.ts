@@ -5,14 +5,12 @@ import {
   InferInsertType,
   InferResultType,
   InferUpdateType,
-  TSchema,
 } from "@/types/drizzle.types";
 import { Pagination } from "@/types/pagination.types";
 
 import { db } from "..";
 import { users } from "../schemas";
 import { getDataList } from "../helpers/get-data-list";
-import { includeWith } from "../helpers/include-attributes";
 import { excludeAttributes } from "../helpers/exclude-attributes";
 
 export const userRelation = {
@@ -30,23 +28,14 @@ export const findUserByUuid = async (
 ) => {
   const user = await db.query.users.findFirst({
     where: eq(users.uuid, uuid),
-    with: userRelation,
   });
 
   return excludeAttributes<"users">(user, exclude);
 };
 
-// export const findUserByUsername = async (username: string) => {
-//   return await db.query.users.findFirst({
-//     where: eq(users.username, username),
-//     with: userRelation,
-//   });
-// };
-
 export const findUserByEmail = async (email: string) => {
   return await db.query.users.findFirst({
     where: eq(users.email, email),
-    with: includeWith<TSchema["users"]>(users, ["uuid", "fullName", "email"]),
   });
 };
 

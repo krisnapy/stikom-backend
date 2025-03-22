@@ -4,8 +4,9 @@ import { users } from "../schemas";
 import { uuidv7 } from "uuidv7";
 import { InferInsertType } from "@/types/drizzle.types";
 
-const firstUserUUID = uuidv7();
-const argon2 = new Argon2id();
+export const firstUserUUID = uuidv7();
+export const secondUserUUID = uuidv7();
+export const argon2 = new Argon2id();
 
 const userSeeds = async (): Promise<Array<InferInsertType<"users">>> => [
   {
@@ -19,7 +20,7 @@ const userSeeds = async (): Promise<Array<InferInsertType<"users">>> => [
     phoneNumber: "0812345678900",
   },
   {
-    uuid: uuidv7(),
+    uuid: secondUserUUID,
     email: "user2@test.test",
     fullName: "User Test 2",
     address: "Graha Asri Persada",

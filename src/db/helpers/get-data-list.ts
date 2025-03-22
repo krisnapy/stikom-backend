@@ -1,6 +1,9 @@
+import camelCase from "lodash/camelCase";
+import { PgTableWithColumns } from "drizzle-orm/pg-core";
+import { SQL, asc, desc, getTableName, sql } from "drizzle-orm";
+
 import { Pagination } from "@/types/pagination.types";
 import { db } from "..";
-import { SQL, asc, desc, getTableName, sql } from "drizzle-orm";
 import { excludeAttributes } from "./exclude-attributes";
 import {
   IncludeRelation,
@@ -9,21 +12,37 @@ import {
   TSchema,
 } from "@/types/drizzle.types";
 
-export const getDataList = async <T extends keyof TSchema>(
-  data: Schema[T],
-  pagination: Pagination<T>,
+// Define base pagination metadata type
+type PaginationMetadata = {
+  total: number;
+  totalPage: number;
+  currentPage: number;
+  perPage: number;
+  direction: "asc" | "desc";
+  orderBy: string;
+};
+
+type GetDataListProps<T extends keyof TSchema> = {
+  data: Schema[T];
+  pagination: Pagination<T>;
   options?: {
     with?: IncludeRelation<T>;
     where?: SQL;
     exclude?: Array<keyof InferResultType<T>>;
-  }
+    columns?: Record<keyof InferResultType<T>, boolean>;
+  };
+};
+
+export const getDataList = async <T extends keyof TSchema>(
+  props: GetDataListProps<T>
 ) => {
-  const { direction = "asc", orderBy = "createdAt" } = pagination;
+  const { data, pagination, options } = props;
+  const { direction = "asc", orderBy = "createdAt" } = pagination || {};
 
   const limit = Number(pagination?.limit) || 10;
   const offset = Number(pagination?.page) || 1;
 
-  const tableName: T = getTableName(data) as T;
+  const tableName: T = camelCase(getTableName(data)) as T;
 
   const orderByColumn =
     direction === "asc"
@@ -40,16 +59,19 @@ export const getDataList = async <T extends keyof TSchema>(
   const formattedDatas = excludeAttributes<T>(datas, options.exclude || []);
   const [total] = await db
     .select({ count: sql<number>`(COUNT(*))` })
-    .from(data);
+    .from(data as PgTableWithColumns<any>)
+    .where(options?.where || undefined);
   const totalPage = Math.ceil(Number(total.count) / limit);
 
   return {
-    datas: formattedDatas,
+    [tableName as T]: formattedDatas,
     total: Number(total.count),
     totalPage,
     currentPage: offset,
     perPage: limit,
     direction,
     orderBy,
+  } as PaginationMetadata & {
+    [key in T]: Array<InferResultType<T>>;
   };
 };

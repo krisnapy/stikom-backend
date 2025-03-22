@@ -11,7 +11,7 @@ import { excludeAttributes } from "@/db/helpers/exclude-attributes";
 import { ElysiaContext } from "@/types/elysia-context.types";
 import { InferResultType } from "@/types/drizzle.types";
 
-type AdminContext = ElysiaContext<{ body: InferResultType<"admins"> }>;
+type AdminContext = ElysiaContext<InferResultType<"admins">>;
 
 const argon2 = new Argon2();
 

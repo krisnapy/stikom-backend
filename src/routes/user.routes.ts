@@ -3,9 +3,12 @@ import { Elysia } from "elysia";
 import UserController from "@/controllers/user.controller";
 import { isAdminAuthenticated } from "@/middlewares/auth.middleware";
 
+import { queryCollectionModel } from "./helpers/models/query";
+
 export default (app: Elysia) => {
-  return app.use(isAdminAuthenticated).group("/admin/users", (group) => {
-    group.get("", UserController.getUsers);
+  return app.group("/admin/users", (group) => {
+    group.use(isAdminAuthenticated);
+    group.get("", UserController.getUsers, { query: queryCollectionModel });
     group.get("/:id", UserController.getUser);
     group.put("/:id", UserController.updateUser);
     group.delete("/:id", UserController.deleteUser);

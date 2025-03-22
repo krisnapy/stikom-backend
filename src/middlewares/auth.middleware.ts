@@ -1,30 +1,36 @@
 import { findAdminByUuid, findUserByUuid } from "@/db/services";
 import { jwtAccessSetup } from "@/routes/helpers/auth.setup";
-import { Elysia } from "elysia";
+import { Elysia, error } from "elysia";
 
 export const isUserAuthenticated = (app: Elysia) =>
   app
     .use(jwtAccessSetup)
-    .derive(async ({ jwtAccess, set, request: { headers } }) => {
+    .derive(async ({ jwtAccess, request: { headers } }) => {
       const authorization = headers.get("authorization");
 
       if (!authorization) {
-        set.status = 401;
-        throw Error("You are not authorized to access this");
+        return error(401, {
+          message: "You are not authorized to access this",
+          name: "Unauthorized",
+        });
       }
 
       const token = authorization.split(" ").pop();
 
       if (!token) {
-        set.status = 401;
-        throw Error("You are not authorized to access this");
+        return error(401, {
+          message: "You are not authorized to access this",
+          name: "Unauthorized",
+        });
       }
 
       const payload = await jwtAccess.verify(token);
 
       if (!payload) {
-        set.status = 401;
-        throw Error("You are not authorized to access this");
+        return error(401, {
+          message: "You are not authorized to access this",
+          name: "Unauthorized",
+        });
       }
 
       const { uuid } = payload;
@@ -32,8 +38,10 @@ export const isUserAuthenticated = (app: Elysia) =>
       const user = await findUserByUuid(uuid);
 
       if (!user) {
-        set.status = 401;
-        throw Error("You are not authorized to access this");
+        return error(401, {
+          message: "You are not authorized to access this",
+          name: "Unauthorized",
+        });
       }
 
       return { user };
@@ -42,25 +50,33 @@ export const isUserAuthenticated = (app: Elysia) =>
 export const isAdminAuthenticated = (app: Elysia) =>
   app
     .use(jwtAccessSetup)
-    .derive(async ({ jwtAccess, set, request: { headers } }) => {
+    .derive(async ({ jwtAccess, request: { headers } }) => {
       const authorization = headers.get("authorization");
 
+      console.log("admin", authorization);
+
       if (!authorization) {
-        set.status = 401;
-        throw Error("You are not authorized to access this");
+        return error(401, {
+          message: "You are not authorized to access this",
+          name: "Unauthorized",
+        });
       }
 
       const token = authorization.split(" ").pop();
 
       if (!token) {
-        set.status = 401;
-        throw Error("You are not authorized to access this");
+        return error(401, {
+          message: "You are not authorized to access this",
+          name: "Unauthorized",
+        });
       }
 
       const payload = await jwtAccess.verify(token);
       if (!payload) {
-        set.status = 401;
-        throw Error("You are not authorized to access this");
+        return error(401, {
+          message: "You are not authorized to access this",
+          name: "Unauthorized",
+        });
       }
 
       const { uuid } = payload;
@@ -68,8 +84,10 @@ export const isAdminAuthenticated = (app: Elysia) =>
       const admin = await findAdminByUuid(uuid);
 
       if (!admin) {
-        set.status = 401;
-        throw Error("You are not authorized to access this");
+        return error(401, {
+          message: "You are not authorized to access this",
+          name: "Unauthorized",
+        });
       }
 
       return { admin };

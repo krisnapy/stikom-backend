@@ -13,10 +13,9 @@ import { InferResultType } from "@/types/drizzle.types";
 
 const argon2 = new Argon2id();
 
-const createNewUser = async ({
-  body,
-  set,
-}: ElysiaContext<{ body: InferResultType<"users"> }>) => {
+type UserContext = ElysiaContext<InferResultType<"users">>;
+
+const createNewUser = async ({ body, set }: UserContext) => {
   try {
     const hashPass = await argon2.hash(body.password);
 
@@ -34,13 +33,7 @@ const createNewUser = async ({
   }
 };
 
-const updateUser = async ({
-  body,
-  params,
-  set,
-}: ElysiaContext<{
-  body: InferResultType<"users">;
-}>) => {
+const updateUser = async ({ body, params, set }: UserContext) => {
   try {
     const user = await updateUserByUuid(body, params.id);
 

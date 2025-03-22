@@ -8,10 +8,8 @@ import { findAdminByEmail, findAdminByUuid } from "@/db/services";
 const argon2 = new Argon2();
 
 export type AuthContext = ElysiaContext<{
-  body: {
-    email: string;
-    password: string;
-  };
+  email: string;
+  password: string;
 }>;
 
 const login = async ({
@@ -23,8 +21,6 @@ const login = async ({
 }: AuthContext) => {
   try {
     const error = generateRequiredFields(["email", "password"]);
-
-    console.log(error);
 
     if (error) return error;
 

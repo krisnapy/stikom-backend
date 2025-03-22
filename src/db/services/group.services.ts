@@ -33,6 +33,14 @@ export const userColumns = {
 
 export const groupRelation = {
   groupMembers: {
+    columns: {
+      uuid: false,
+      groupId: false,
+      userId: false,
+      role: false,
+      createdAt: false,
+      updatedAt: false,
+    },
     with: userColumns,
   },
 };
@@ -55,13 +63,19 @@ export const findGroupByUuid = async (
 /**
  * Find all groups by user ID
  */
-export const findGroupByUserId = async (
+export const findGroupsByUserId = async (
   userId: string,
   pagination?: Pagination<"groups">
 ) => {
-  return await getDataList<"groups">(groups, pagination, {
-    with: groupRelation,
+  const memberGroups = await db.query.groupMembers.findMany({
     where: eq(groupMembers.userId, userId),
+  });
+
+  const groupIds = memberGroups.map((member) => member.groupId);
+
+  return await getDataList<"groups">(groups, pagination, {
+    where: inArray(groups.uuid, groupIds),
+    with: groupRelation,
   });
 };
 
@@ -80,6 +94,7 @@ export const findAllGroups = async (pagination?: Pagination<"groups">) => {
 export const createGroup = async (data: InferInsertType<"groups">) => {
   const [group] = await db
     .insert(groups)
+    .overridingSystemValue()
     .values({
       uuid: uuidv7(),
       ...data,
@@ -115,7 +130,8 @@ export const deleteGroupByUuid = async (uuid: string) => {
  */
 export const addMemberToGroupByUuid = async (
   groupId: string,
-  userId: string[]
+  userId: string[],
+  role: "creator" | "admin" | "member" = "member"
 ) => {
   const group = await db.query.groups.findFirst({
     where: eq(groups.uuid, groupId),
@@ -128,7 +144,7 @@ export const addMemberToGroupByUuid = async (
 
   return await db
     .insert(groupMembers)
-    .values(userId.map((userId) => ({ groupId, userId })));
+    .values(userId.map((userId) => ({ groupId, userId, role })));
 };
 
 /**
@@ -151,9 +167,12 @@ export const removeMemberFromGroupByUuid = async (
 /**
  * Find all members of a group
  */
-export const findAllMembersOfGroup = async (groupId: string) => {
-  return await db.query.groupMembers.findMany({
+export const findAllMembersOfGroup = async (
+  groupId: string,
+  pagination?: Pagination<"groupMembers">
+) => {
+  return await getDataList<"groupMembers">(groupMembers, pagination, {
     where: eq(groupMembers.groupId, groupId),
-    with: userColumns,
+    ...groupRelation.groupMembers,
   });
 };

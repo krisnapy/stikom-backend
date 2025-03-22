@@ -12,7 +12,7 @@ export const jwtAccessSetup = new Elysia({
       uuid: t.Optional(t.String()),
     }),
     secret: ACCESS_TOKEN_SECRET!,
-    exp: "5m",
+    exp: "1d",
   })
 );
 

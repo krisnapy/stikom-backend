@@ -28,7 +28,8 @@ export type InferResultType<
 >;
 
 export type InferInsertType<TableName extends keyof TSchema> = PgInsertValue<
-  Schema[TableName]
+  Schema[TableName],
+  true
 >;
 
 export type InferUpdateType<TableName extends keyof TSchema> =
