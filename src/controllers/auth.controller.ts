@@ -23,7 +23,7 @@ const login = async ({
   try {
     const requiredFields = generateRequiredFields(['email', 'password']);
 
-    if (requiredFields) return requiredFields;
+    if (requiredFields) return error(400, requiredFields);
 
     const user = await findUserByEmail(body.email);
 
@@ -33,7 +33,6 @@ const login = async ({
         name: 'InvalidCredentials',
       });
     }
-    
 
     const matchPass = await argon2.verify(user.password, body.password);
 
@@ -44,7 +43,7 @@ const login = async ({
       });
     }
 
-    const userObj = pick(user, ['ud']);
+    const userObj = pick(user, ['id']);
 
     await generateAccessSession(userObj);
     await generateRefreshSession(userObj);
@@ -52,10 +51,8 @@ const login = async ({
     set.status = 200;
 
     return { message: 'Login successful!!', user: omit(user, ['password']) };
-  } catch (error) {
-    console.error(error);
-    set.status = 500;
-    return error;
+  } catch (err) {
+    return error(500, { message: 'Internal server error', error: err });
   }
 };
 
@@ -103,14 +100,13 @@ const refreshToken = async ({
   try {
     const refreshToken = String(cookie.refreshToken);
 
-    set.status = 401;
-    if (!refreshToken) throw new Error('Invalid token');
+    if (!refreshToken) return error(401, { message: 'Invalid token' });
 
     const auth = await jwtRefresh.verify(refreshToken);
 
     const user = await findUserById(auth.id);
 
-    if (!user) throw new Error('Invalid token');
+    if (!user) return error(401, { message: 'Invalid token' });
 
     const userObj = pick(user, ['id']);
 
@@ -119,9 +115,8 @@ const refreshToken = async ({
     set.status = 200;
 
     return { message: 'Refresh token success', user: omit(user, ['password']) };
-  } catch (error) {
-    set.status = 500;
-    return { message: 'Refresh token failed', data: error };
+  } catch (err) {
+    return error(500, { message: 'Refresh token failed', error: err });
   }
 };
 

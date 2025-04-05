@@ -27,7 +27,7 @@ export const isUserAuthenticated = (app: Elysia) =>
 
       const payload = await jwtAccess.verify(token);
 
-      if (!payload) {
+      if (!payload || !payload.id) {
         return error(401, {
           message: 'You are not authorized to access this',
           name: 'Unauthorized',

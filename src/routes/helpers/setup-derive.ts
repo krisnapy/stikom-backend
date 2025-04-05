@@ -1,5 +1,5 @@
 import { JWTPayloadSpec } from '@elysiajs/jwt';
-import { Elysia } from 'elysia';
+import { Elysia, error } from 'elysia';
 
 import { Admin, User } from '@/db/schemas';
 import { generateRequiredFields as requiredFields } from '@/utils/generate-required-field';
@@ -49,10 +49,9 @@ export const derive = (app: Elysia) => {
         return { refreshToken, payload: refreshTokenDecode };
       },
       generateRequiredFields: (fields: Array<string>) => {
-        const error = requiredFields(body as Record<string, unknown>, fields);
+        const err = requiredFields(body as Record<string, unknown>, fields);
 
-        set.status = 400;
-        if (Object.entries(error).length) return error;
+        if (Object.entries(err).length) return err;
       },
     }));
 };

@@ -1,3 +1,4 @@
+import { error } from 'elysia';
 import omit from 'lodash/omit';
 import pick from 'lodash/pick';
 import { Argon2id as Argon2 } from 'oslo/password';
@@ -20,26 +21,26 @@ const login = async ({
   generateRequiredFields,
 }: AuthContext) => {
   try {
-    const error = generateRequiredFields(['email', 'password']);
+    const requiredFields = generateRequiredFields(['email', 'password']);
 
-    if (error) return error;
+    if (requiredFields) return error(400, requiredFields);
 
     const admin = await findAdminByEmail(body.email);
 
     if (!admin) {
-      set.status = 401;
-      const error = new Error('Invalid email or password!!');
-      error.name = 'InvalidCredentials';
-      throw error;
+      return error(401, {
+        message: 'Invalid email or password!!',
+        name: 'InvalidCredentials',
+      });
     }
 
     const matchPass = await argon2.verify(admin.password, body.password);
 
     if (!matchPass) {
-      set.status = 401;
-      const error = new Error('Invalid email or password!!');
-      error.name = 'InvalidCredentials';
-      throw error;
+      return error(401, {
+        message: 'Invalid email or password!!',
+        name: 'InvalidCredentials',
+      });
     }
 
     const adminObj = pick(admin, ['id']);
@@ -50,9 +51,8 @@ const login = async ({
     set.status = 200;
 
     return { message: 'Login successful!!', admin: omit(admin, ['password']) };
-  } catch (error) {
-    set.status = 500;
-    return error;
+  } catch (err) {
+    return error(500, { message: 'Internal server error', error: err });
   }
 };
 
@@ -62,9 +62,8 @@ const me = async ({ admin, set }: AuthContext) => {
 
     set.status = 200;
     return { message: 'Success', admin: omit(data, ['password']) };
-  } catch (error) {
-    set.status = 500;
-    return error;
+  } catch (err) {
+    return error(500, { message: 'Internal server error', error: err });
   }
 };
 
@@ -85,9 +84,8 @@ const logout = ({ set, cookie }: AuthContext) => {
     set.status = 200;
 
     return { message: 'Logout success' };
-  } catch (error) {
-    set.status = 500;
-    return { message: 'Logout failed', data: error };
+  } catch (err) {
+    return error(500, { message: 'Logout failed', error: err });
   }
 };
 
@@ -109,7 +107,7 @@ const refreshToken = async ({
 
     if (!admin) throw new Error('Invalid token');
 
-    const adminObj = pick(admin, ['uuid']);
+    const adminObj = pick(admin, ['id']);
 
     await generateAccessSession(adminObj);
 
@@ -119,9 +117,8 @@ const refreshToken = async ({
       message: 'Refresh token success',
       admin: omit(admin, ['password']),
     };
-  } catch (error) {
-    set.status = 500;
-    return { message: 'Refresh token failed', data: error };
+  } catch (err) {
+    return error(500, { message: 'Refresh token failed', error: err });
   }
 };
 
