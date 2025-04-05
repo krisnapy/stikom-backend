@@ -36,6 +36,7 @@ export const users = pgTable('users', {
 
 export const usersRelations = relations(users, ({ many }) => ({
   groups: many(groups),
+  stravaTokens: many(stravaTokens),
 }));
 
 export type User = InferResultType<'users'>;

@@ -7,7 +7,7 @@ import { isUserAuthenticated } from '@/middlewares/auth.middleware';
 export default (app: Elysia) => {
   return app.group('/strava', (group) => {
     group.get('/exchange-token', StravaController.exchangeStravaToken);
-    group.get('/webhook', UserController.getUsers);
+    group.get('/webhook', StravaController.subscribeWebhook);
     group.use(isUserAuthenticated);
     group.delete('/deauthorize', UserController.getUsers);
     group.get('/oauth', StravaController.getStravaOauth);
