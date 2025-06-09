@@ -1,0 +1,8 @@
+
+# Wrangler Configuration
+
+# Resources:
+# https://developers.cloudflare.com/workers/quickstart/
+# https://developers.cloudflare.com/workers/tooling/wrangler/configuration/
+
+name = "stikom-backend"
