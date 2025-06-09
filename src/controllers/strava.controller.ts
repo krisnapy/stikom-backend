@@ -1,8 +1,12 @@
 import { error } from 'elysia';
 
 import {
+  createStravaActivities,
+  createStravaActivity,
   createStravaAthlete,
   createStravaToken,
+  findStravaTokenByUserId,
+  findUserByStravaAthleteId,
 } from '@/db/services/strava.services';
 import {
   STRAVA_CLIENT_ID,
@@ -30,6 +34,33 @@ const getStravaOauth = ({ set, user }: ElysiaContext) => {
   return { message: 'Redirecting to Strava', url: url.toString() };
 };
 
+const refreshToken = async ({ set, user }: ElysiaContext) => {
+  const stravaToken = await findStravaTokenByUserId(user.id);
+
+  if (!stravaToken) {
+    set.status = 404;
+    return { message: 'Strava token not found' };
+  }
+
+  const url = new URL('https://www.strava.com/api/v3/oauth/token');
+
+  url.searchParams.set('client_id', STRAVA_CLIENT_ID);
+  url.searchParams.set('client_secret', STRAVA_CLIENT_SECRET);
+  url.searchParams.set('grant_type', 'refresh_token');
+  url.searchParams.set('refresh_token', stravaToken.refreshToken);
+
+  const response = await fetch(url.toString(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+  });
+
+  const data = await response.json();
+
+  return { data };
+};
+
 const createSubscription = async () => {
   const url = new URL('https://www.strava.com/api/v3/push_subscriptions');
 
@@ -51,19 +82,16 @@ const createSubscription = async () => {
 };
 
 const subscribeWebhook = ({ query, set }: ElysiaContext) => {
-  const { mode, verify_token, challenge } = query;
+  const verifyToken = query['hub.verify_token'];
+  const mode = query['hub.mode'];
 
-  if (mode !== 'subscribe' || verify_token !== 'STRAVA') {
+  if (mode !== 'subscribe' || verifyToken !== 'STRAVA') {
     set.status = 400;
     return { message: 'Invalid request' };
   }
 
-  if (challenge) {
-    set.status = 200;
-    return { message: challenge };
-  }
-
-  return { message: 'Webhook subscribed' };
+  set.status = 200;
+  return { 'hub.challenge': query['hub.challenge'], 'hub.mode': mode };
 };
 
 const exchangeStravaToken = async ({ query, set }: ElysiaContext) => {
@@ -105,6 +133,7 @@ const exchangeStravaToken = async ({ query, set }: ElysiaContext) => {
 
   try {
     await createSubscription();
+    saveUserActivities(userId);
 
     set.status = 200;
     return { message: 'Strava token successfully created' };
@@ -113,4 +142,86 @@ const exchangeStravaToken = async ({ query, set }: ElysiaContext) => {
   }
 };
 
-export default { getStravaOauth, exchangeStravaToken, subscribeWebhook };
+const handleWebhook = async ({ body, set }: ElysiaContext) => {
+  const { object_id, owner_id } = body as {
+    object_id: string;
+    owner_id: string;
+  };
+
+  const user = await findUserByStravaAthleteId(owner_id);
+
+  if (!user) {
+    set.status = 404;
+    return { message: 'User not found' };
+  }
+
+  await syncStravaActivity(user.id, object_id);
+  set.status = 200;
+  return { message: 'Webhook received' };
+};
+
+const syncStravaActivity = async (userId: string, activityId: string) => {
+  const { data: activity } = await getStravaActivity(userId, activityId);
+
+  const stravaActivity = await createStravaActivity({
+    ...activity,
+    athleteId: activity.athlete.id,
+  });
+
+  return { activity: stravaActivity };
+};
+
+const getStravaActivity = async (userId: string, activityId: string) => {
+  const url = new URL(
+    `https://www.strava.com/api/v3/athlete/activities/${activityId}`,
+  );
+
+  const stravaToken = await findStravaTokenByUserId(userId);
+
+  const response = await fetch(url.toString(), {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${stravaToken.accessToken}`,
+    },
+  });
+
+  const data = await response.json();
+
+  return { data };
+};
+
+const saveUserActivities = async (userId: string) => {
+  const url = new URL('https://www.strava.com/api/v3/athlete/activities');
+
+  const stravaToken = await findStravaTokenByUserId(userId);
+
+  const response = await fetch(url.toString(), {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${stravaToken.accessToken}`,
+    },
+  });
+
+  const data = await response.json();
+
+  const activities = data.map((activity: any) => ({
+    ...activity,
+    athleteId: activity.athlete.id,
+    summaryPolyline: activity?.map?.summary_polyline,
+    polyline: activity?.map?.polyline,
+  }));
+
+  const stravaActivities = await createStravaActivities(activities);
+
+  return { data: stravaActivities };
+};
+
+export default {
+  getStravaOauth,
+  exchangeStravaToken,
+  subscribeWebhook,
+  handleWebhook,
+  refreshToken,
+};

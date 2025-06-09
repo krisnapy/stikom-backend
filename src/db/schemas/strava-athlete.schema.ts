@@ -26,12 +26,13 @@ export const stravaAthletes = pgTable('strava_athletes', {
   sex: varchar('sex', { length: 255 }),
   premium: boolean('premium'),
   summit: boolean('summit'),
-  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
-  updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow(),
   badgeTypeId: integer('badge_type_id'),
   weight: integer('weight'),
   profileMedium: varchar('profile_medium', { length: 255 }),
   profile: varchar('profile', { length: 255 }),
+  
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
+  updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow(),
 });
 
 export const stravaAthletesRelations = relations(

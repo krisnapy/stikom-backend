@@ -7,8 +7,11 @@ import stravaRoutes from './strava.routes';
 import userRoutes from './user.routes';
 
 export default (app: Elysia) =>
-  app
-    .use(derive)
-    .group('/api/v1', (app) =>
-      app.use(authRoutes).use(userRoutes).use(groupRoutes).use(stravaRoutes),
-    );
+  app.use(derive).group('/api/v1', (app) =>
+    app
+      .get('_health', () => 'OK')
+      .use(authRoutes)
+      .use(userRoutes)
+      .use(groupRoutes)
+      .use(stravaRoutes),
+  );

@@ -78,7 +78,6 @@ const getMyGroup = async ({ user, set }: ElysiaContext) => {
     set.status = 200;
     return { message: 'Get my group successful', ...groups };
   } catch (err) {
-    console.log(err);
     return error(500, { message: 'Internal server error', error: err });
   }
 };
@@ -157,7 +156,7 @@ const leaveGroup = async ({ params, set, user }: ElysiaContext) => {
   }
 };
 
-export const deleteGroup = async ({ params, set }: ElysiaContext) => {
+const deleteGroup = async ({ params, set }: ElysiaContext) => {
   try {
     const group = await deleteGroupById(params.id);
     const groupMembers = await findAllMembersOfGroup(params.id);

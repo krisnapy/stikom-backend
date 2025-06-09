@@ -8,6 +8,7 @@ export default (app: Elysia) => {
   return app.group('/strava', (group) => {
     group.get('/exchange-token', StravaController.exchangeStravaToken);
     group.get('/webhook', StravaController.subscribeWebhook);
+    group.post('/webhook', StravaController.handleWebhook);
     group.use(isUserAuthenticated);
     group.delete('/deauthorize', UserController.getUsers);
     group.get('/oauth', StravaController.getStravaOauth);
