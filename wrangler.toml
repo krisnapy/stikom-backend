@@ -6,3 +6,7 @@
 # https://developers.cloudflare.com/workers/tooling/wrangler/configuration/
 
 name = "stikom-backend"
+
+[site]
+bucket = "build"
+entry-point = "workers-site"
