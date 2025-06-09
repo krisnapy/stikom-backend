@@ -10,7 +10,7 @@ compatibility_date = "2025-06-09"
 
 main = "./build/index.js"
 
-[rules]
+[[rules]]
 type = "ESModule"
 globs = ["**/*.js"]
 
