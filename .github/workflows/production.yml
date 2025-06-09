@@ -38,7 +38,6 @@ jobs:
             DATABASE_PORT
             DATABASE_USERNAME
             REFRESH_TOKEN_SECRET
-            SECRET_PORT
             STRAVA_CLIENT_ID
             STRAVA_CLIENT_SECRET
             DATABASE_URL
@@ -55,7 +54,6 @@ jobs:
           DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
           DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
           REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
-          SECRET_PORT: ${{ secrets.SECRET_PORT }}
           STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
           STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
