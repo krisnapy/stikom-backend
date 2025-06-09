@@ -6,7 +6,7 @@
 # https://developers.cloudflare.com/workers/tooling/wrangler/configuration/
 
 name = "stikom-backend"
-main = "build"
+main = "./build/index.js"
 
 [env.staging]
 name = "app-staging"
