@@ -7,6 +7,7 @@
 
 name = "stikom-backend"
 main = "./build/index.js"
+compatibility_date = "2025-06-09"
 
 [env.staging]
 name = "app-staging"
