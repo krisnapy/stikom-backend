@@ -8,11 +8,9 @@
 name = "stikom-backend"
 compatibility_date = "2025-06-09"
 
-[build.upload]
-format = "modules"
 main = "./build/index.js"
 
-[[build.upload.rules]]
+[rules]
 type = "ESModule"
 globs = ["**/*.js"]
 
