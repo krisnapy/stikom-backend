@@ -9,4 +9,13 @@ name = "stikom-backend"
 
 [site]
 bucket = "build"
-entry-point = "workers-site"
+entry-point = "build"
+
+[env.staging]
+name = "app-staging"
+
+[env.production]
+name = "app-production"
+
+[observability.logs]
+enabled = true
