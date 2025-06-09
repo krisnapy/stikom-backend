@@ -3,20 +3,32 @@ name: Deploy Production
 on:
   push:
     branches:
-      - main
+      - ci/production
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy Production
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build
+        run: bun run build
+
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:
           environment: production
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: ./build
           secrets: |
             PORT
             ACCESS_TOKEN_SECRET
