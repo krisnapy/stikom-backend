@@ -21,7 +21,7 @@ export const users = pgTable('users', {
   id: uuid('id').primaryKey().default(uuidv7()).$defaultFn(uuidv7),
   fullName: varchar('full_name', { length: 255 }),
   email: varchar('email', { length: 100 }).unique().notNull(),
-  phoneNumber: varchar('phone_number', { length: 15 }).unique().notNull(),
+  phoneNumber: varchar('phone_number', { length: 15 }),
   avatar: varchar('avatar', { length: 255 }),
   gender: genderEnum('gender'),
   password: varchar('password', { length: 100 }),

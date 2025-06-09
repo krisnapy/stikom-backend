@@ -9,11 +9,11 @@ const seedAll = async () => {
     await userSeeder();
     await groupSeeder();
     await groupMemberSeeder();
-
-    console.log('All seeders executed successfully!');
   } catch (error) {
     console.error('Error in seedAll:', error);
   }
 };
 
-await seedAll();
+await seedAll().then(() => {
+  console.log('All seeders executed successfully!');
+});

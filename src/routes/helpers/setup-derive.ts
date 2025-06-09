@@ -1,5 +1,5 @@
 import { JWTPayloadSpec } from '@elysiajs/jwt';
-import { Elysia, error } from 'elysia';
+import { Elysia } from 'elysia';
 
 import { Admin, User } from '@/db/schemas';
 import { generateRequiredFields as requiredFields } from '@/utils/generate-required-field';
