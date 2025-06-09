@@ -11,6 +11,7 @@ export default (app: Elysia) => {
   return app
     .group('/auth', (group) => {
       group.post('/login', AuthController.login);
+      group.post('/register', AuthController.register);
       group.delete('/logout', AuthController.logout);
       group.get('/refresh-token', AuthController.refreshToken);
       group.use(isUserAuthenticated);

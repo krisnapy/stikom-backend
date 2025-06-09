@@ -1,4 +1,5 @@
 import { eq } from 'drizzle-orm';
+import omit from 'lodash/omit';
 
 import {
   InferInsertType,
@@ -8,7 +9,6 @@ import {
 import { Pagination } from '@/types/pagination.types';
 
 import { db } from '..';
-import { excludeAttributes } from '../helpers/exclude-attributes';
 import { getDataList } from '../helpers/get-data-list';
 import { users } from '../schemas';
 
@@ -29,7 +29,7 @@ export const findUserById = async (
     where: eq(users.id, id),
   });
 
-  return excludeAttributes<'users'>(user, exclude);
+  return omit(user, exclude) as InferResultType<'users'>;
 };
 
 export const findUserByEmail = async (email: string) => {

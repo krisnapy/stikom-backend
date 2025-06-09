@@ -1,3 +1,4 @@
+import { error } from 'elysia';
 import omit from 'lodash/omit';
 import { Argon2id } from 'oslo/password';
 
@@ -27,9 +28,8 @@ const createNewUser = async ({ body, set }: UserContext) => {
     set.status = 201;
 
     return { message: 'User created', user: omit(user, ['password']) };
-  } catch (error) {
-    set.status = 500;
-    return { message: 'Internal server error' };
+  } catch (err) {
+    return error(500, { message: 'Internal server error', error: err });
   }
 };
 
@@ -45,20 +45,18 @@ const updateUser = async ({ body, params, set }: UserContext) => {
     set.status = 200;
 
     return { message: 'User updated', user: omit(user, ['password']) };
-  } catch (error) {
-    set.status = 500;
-    return { message: 'Internal server error', error };
+  } catch (err) {
+    return error(500, { message: 'Internal server error', error: err });
   }
 };
 
-const getUsers = async ({ query, set }: ElysiaContext) => {
+const getUsers = async ({ query }: ElysiaContext) => {
   try {
     const users = await findAllUsers(query);
 
     return { message: 'Get user list successful', ...users };
-  } catch (error) {
-    set.status = 500;
-    return { message: 'Internal server error', error };
+  } catch (err) {
+    return error(500, { message: 'Internal server error', error: err });
   }
 };
 
@@ -68,9 +66,8 @@ const getUser = async ({ params, set }: ElysiaContext) => {
 
     set.status = 200;
     return { message: 'Get user successful', users: omit(users, ['password']) };
-  } catch (error) {
-    set.status = 500;
-    return { message: 'Internal server error' };
+  } catch (err) {
+    return error(500, { message: 'Internal server error', error: err });
   }
 };
 
@@ -85,9 +82,8 @@ const deleteUser = async ({ params, set }: ElysiaContext) => {
 
     set.status = 200;
     return { message: 'User deleted' };
-  } catch (error) {
-    set.status = 500;
-    return { message: 'Internal server error', error };
+  } catch (err) {
+    return error(500, { message: 'Internal server error', error: err });
   }
 };
 

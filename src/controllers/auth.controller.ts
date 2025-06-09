@@ -3,14 +3,26 @@ import omit from 'lodash/omit';
 import pick from 'lodash/pick';
 import { Argon2id as Argon2 } from 'oslo/password';
 
-import { findUserByEmail, findUserById } from '@/db/services/user.services';
+import {
+  createUser,
+  findUserByEmail,
+  findUserById,
+} from '@/db/services/user.services';
 import { ElysiaContext } from '@/types/elysia-context.types';
+import { uploadImage } from '@/utils/cloudinary';
 
 const argon2 = new Argon2();
 
 export type AuthContext = ElysiaContext<{
   email: string;
   password: string;
+}>;
+
+export type RegisterContext = ElysiaContext<{
+  email: string;
+  password: string;
+  fullName: string;
+  avatar: string;
 }>;
 
 const login = async ({
@@ -62,13 +74,12 @@ const me = async ({ user, set }: AuthContext) => {
 
     set.status = 200;
     return { message: 'Success', user: omit(data, ['password']) };
-  } catch (error) {
-    set.status = 500;
-    return error;
+  } catch (err) {
+    return error(500, { message: 'Internal server error', error: err });
   }
 };
 
-const logout = ({ set, cookie, jwtRefresh }: AuthContext) => {
+const logout = ({ set, cookie }: AuthContext) => {
   try {
     const refreshToken = cookie.refreshToken;
 
@@ -85,9 +96,8 @@ const logout = ({ set, cookie, jwtRefresh }: AuthContext) => {
     set.status = 200;
 
     return { message: 'Logout success' };
-  } catch (error) {
-    set.status = 500;
-    return { message: 'Logout failed', data: error };
+  } catch (err) {
+    return error(500, { message: 'Logout failed', error: err });
   }
 };
 
@@ -120,4 +130,32 @@ const refreshToken = async ({
   }
 };
 
-export default { login, me, logout, refreshToken };
+const register = async ({ body, set }: RegisterContext) => {
+  try {
+    let avatarUrl = null;
+
+    if (body.avatar) {
+      avatarUrl = await uploadImage(body.avatar, 'users');
+    }
+
+    const hashPass = await argon2.hash(String(body.password));
+
+    const user = await createUser({
+      ...body,
+      password: hashPass,
+      avatar: avatarUrl,
+      status: 'active',
+    });
+
+    set.status = 201;
+
+    return {
+      message: 'User created successfully',
+      user: omit(user, ['password']),
+    };
+  } catch (err) {
+    return error(500, { message: 'Internal server error', error: err });
+  }
+};
+
+export default { login, me, logout, refreshToken, register };
