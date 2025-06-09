@@ -10,10 +10,6 @@ compatibility_date = "2025-06-09"
 
 main = "./build/index.js"
 
-[[rules]]
-type = "ESModule"
-globs = ["**/*.js"]
-
 [env.staging]
 name = "app-staging"
 

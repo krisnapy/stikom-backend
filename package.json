@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "bun --watch src/index.ts",
-    "build": "bun build src/index.ts  --outdir ./build --target bun",
+    "build": "bun build src/index.ts  --outdir ./build --target bun --format iife",
     "start": "NODE_ENV=production bun run build/index.js",
     "build-tsc": "tsc -p index.ts --outdir dist",
     "apply-migration": "bun drizzle-kit migrate",
