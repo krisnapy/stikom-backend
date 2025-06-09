@@ -6,8 +6,15 @@
 # https://developers.cloudflare.com/workers/tooling/wrangler/configuration/
 
 name = "stikom-backend"
-main = "./build/index.js"
 compatibility_date = "2025-06-09"
+
+[build.upload]
+format = "modules"
+main = "./build/index.js"
+
+[[build.upload.rules]]
+type = "ESModule"
+globs = ["**/*.js"]
 
 [env.staging]
 name = "app-staging"
