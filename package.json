@@ -14,14 +14,14 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "deploy": "wrangler deploy --minify src/index.ts",
-    "dev:wrangler": "wrangler dev src/index.ts"
+    "dev:wrangler": "wrangler dev src/index.ts",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@babel/core": "^7.23.9",
     "@babel/register": "^7.23.7",
     "@elysiajs/jwt": "^1.2.0",
     "@elysiajs/swagger": "^1.2.2",
-    "@types/node": "^20.11.17",
     "axios": "^1.9.0",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.6.1",
