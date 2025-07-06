@@ -10,7 +10,7 @@ import { users } from './user.schema';
 export const roleEnum = pgEnum('role', ['creator', 'admin', 'member']);
 
 export const groupMembers = pgTable('group_members', {
-  id: uuid('id').primaryKey().default(uuidv7()).$defaultFn(uuidv7),
+  id: uuid('id').primaryKey().$defaultFn(uuidv7),
   groupId: uuid('group_id').references(() => groups.id),
   userId: uuid('user_id').references(() => users.id),
   role: roleEnum('role').notNull().default('member'),

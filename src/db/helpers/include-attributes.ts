@@ -4,7 +4,7 @@ import pick from 'lodash/pick';
 import { IncludeRelation, TSchema } from '@/types/drizzle.types';
 
 export const includeAttributes = <DataType extends TSchema[keyof TSchema]>(
-  data: BuildQueryResult<TSchema, DataType, any>,
+  data: BuildQueryResult<TSchema, DataType, Record<string, unknown>>,
   include: Array<keyof DataType['columns']>,
 ) => {
   if (Array.isArray(data)) return data.map((item) => pick(item, include));
@@ -12,7 +12,7 @@ export const includeAttributes = <DataType extends TSchema[keyof TSchema]>(
 };
 
 export const includeWith = <DataType extends TSchema[keyof TSchema]>(
-  data: BuildQueryResult<TSchema, DataType, any>,
+  data: BuildQueryResult<TSchema, DataType, Record<string, unknown>>,
   include: Array<keyof DataType['columns']>,
 ) => {
   return {

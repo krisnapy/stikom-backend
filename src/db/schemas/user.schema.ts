@@ -18,7 +18,7 @@ export const genderEnum = pgEnum('gender', ['male', 'female']);
 export const statusEnum = pgEnum('status', ['active', 'inactive']);
 
 export const users = pgTable('users', {
-  id: uuid('id').primaryKey().default(uuidv7()).$defaultFn(uuidv7),
+  id: uuid('id').primaryKey().$defaultFn(uuidv7),
   fullName: varchar('full_name', { length: 255 }),
   email: varchar('email', { length: 100 }).unique().notNull(),
   phoneNumber: varchar('phone_number', { length: 15 }),

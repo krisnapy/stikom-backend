@@ -24,7 +24,7 @@ export const routeSources = pgEnum('route_source', [
 ]);
 
 export const routes = pgTable('routes', {
-  id: uuid('id').primaryKey().default(uuidv7()).$defaultFn(uuidv7),
+  id: uuid('id').primaryKey().$defaultFn(uuidv7),
   name: varchar('name', { length: 100 }).notNull(),
   startTime: timestamp('start_time', { mode: 'date' }).notNull(),
   distance: doublePrecision('distance').notNull(),

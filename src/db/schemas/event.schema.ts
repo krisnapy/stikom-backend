@@ -18,7 +18,7 @@ import { users } from './user.schema';
 export const eventStatus = pgEnum('event_status', ['cancelled', 'active']);
 
 export const events = pgTable('events', {
-  id: uuid('id').primaryKey().default(uuidv7()).$defaultFn(uuidv7),
+  id: uuid('id').primaryKey().$defaultFn(uuidv7),
   creatorId: uuid('creator_id').references(() => users.id),
   groupId: uuid('group_id').references(() => groups.id),
   name: varchar('name', { length: 100 }).notNull(),

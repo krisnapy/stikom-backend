@@ -9,14 +9,13 @@ import {
   varchar,
   timestamp,
 } from 'drizzle-orm/pg-core';
-import { uuidv7 } from 'uuidv7';
 
 import { stravaActivities } from './strava-activity.schema';
 
 export const stravaDataSources = pgEnum('strava_data_source', ['Activity', 'Route']);
 
 export const stravaData = pgTable('strava_data', {
-  id: uuid('id').primaryKey().default(uuidv7()),
+  id: uuid('id').primaryKey(),
   activityId: bigint('activity_id', { mode: 'number' }).references(
     () => stravaActivities.id,
   ),
