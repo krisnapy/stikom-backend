@@ -2,10 +2,9 @@ import { v2 as cloudinary } from 'cloudinary';
 import { uuidv7 } from 'uuidv7';
 
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_API_NAME || 'dpg067npo',
-  api_key: process.env.CLOUDINARY_API_KEY || '585643216458523',
-  api_secret:
-    process.env.CLOUDINARY_API_SECRET || 'tE1ba1ROCOFeF0_ZF6Q6AJHfXxg',
+  cloud_name: process.env.CLOUDINARY_API_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 export const uploadImage = async (
