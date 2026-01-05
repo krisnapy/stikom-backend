@@ -46,6 +46,14 @@ export const isUserAuthenticated = (app: Elysia) =>
       }
 
       return { user };
+    })
+    .onBeforeHandle(({ user }: any) => {
+      if (!user) {
+        return error(401, {
+          message: 'You are not authorized to access this',
+          name: 'Unauthorized',
+        });
+      }
     });
 
 export const isAdminAuthenticated = (app: Elysia) =>
@@ -53,7 +61,6 @@ export const isAdminAuthenticated = (app: Elysia) =>
     .use(jwtAccessSetup)
     .derive(async ({ jwtAccess, request: { headers } }) => {
       const authorization = headers.get('authorization');
-
 
       if (!authorization) {
         return error(401, {
@@ -91,4 +98,12 @@ export const isAdminAuthenticated = (app: Elysia) =>
       }
 
       return { admin };
+    })
+    .onBeforeHandle(({ admin }: any) => {
+      if (!admin) {
+        return error(401, {
+          message: 'You are not authorized to access this',
+          name: 'Unauthorized',
+        });
+      }
     });

@@ -25,6 +25,7 @@ export const groupModel = t.Object({
   createdAt: t.Date(),
   updatedAt: t.Date(),
   groupMembers: groupMemberCollectionModel,
+  isPublic: t.Boolean(),
 });
 
 export const groupCollectionModel = t.Array(groupModel);

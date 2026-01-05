@@ -7,6 +7,7 @@ import {
   createStravaToken,
   findStravaTokenByUserId,
   findUserByStravaAthleteId,
+  updateStravaToken,
 } from '@/db/services/strava.services';
 import {
   STRAVA_CLIENT_ID,
@@ -14,14 +15,22 @@ import {
   STRAVA_REDIRECT_URI,
   STRAVA_WEBHOOK_URL,
 } from '@/env';
+import { InferInsertType } from '@/types/drizzle.types';
 import { ElysiaContext } from '@/types/elysia-context.types';
+import { transformStravaActivity } from '@/utils/transform-keys.utils';
 
 const getStravaOauth = ({ set, user }: ElysiaContext) => {
   const url = new URL('https://strava.com/oauth/authorize');
 
   const redirectUri = user
-    ? `${STRAVA_REDIRECT_URI}?userId=${user.id}`
-    : STRAVA_REDIRECT_URI;
+    ? `${
+        STRAVA_REDIRECT_URI ||
+        'http://localhost:9091/api/v1/strava/exchange-token'
+      }?userId=${user.id}`
+    : `${
+        STRAVA_REDIRECT_URI ||
+        'http://localhost:9091/api/v1/strava/exchange-token'
+      }`;
 
   url.searchParams.set('client_id', STRAVA_CLIENT_ID);
   url.searchParams.set('approval_prompt', 'force');
@@ -32,33 +41,6 @@ const getStravaOauth = ({ set, user }: ElysiaContext) => {
   set.status = 200;
 
   return { message: 'Redirecting to Strava', url: url.toString() };
-};
-
-const refreshToken = async ({ set, user }: ElysiaContext) => {
-  const stravaToken = await findStravaTokenByUserId(user.id);
-
-  if (!stravaToken) {
-    set.status = 404;
-    return { message: 'Strava token not found' };
-  }
-
-  const url = new URL('https://www.strava.com/api/v3/oauth/token');
-
-  url.searchParams.set('client_id', STRAVA_CLIENT_ID);
-  url.searchParams.set('client_secret', STRAVA_CLIENT_SECRET);
-  url.searchParams.set('grant_type', 'refresh_token');
-  url.searchParams.set('refresh_token', stravaToken.refreshToken);
-
-  const response = await fetch(url.toString(), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-  });
-
-  const data = await response.json();
-
-  return { data };
 };
 
 const createSubscription = async () => {
@@ -94,12 +76,82 @@ const subscribeWebhook = ({ query, set }: ElysiaContext) => {
   return { 'hub.challenge': query['hub.challenge'], 'hub.mode': mode };
 };
 
-const exchangeStravaToken = async ({ query, set }: ElysiaContext) => {
+const refreshStravaToken = async ({ query, set }: ElysiaContext) => {
   const { code, userId } = query;
 
   if (!code) {
     set.status = 400;
-    return { message: 'No code provided' };
+    return false;
+  }
+
+  const stravaToken = await findStravaTokenByUserId(userId);
+
+  if (!stravaToken) {
+    set.status = 404;
+    return false;
+  }
+
+  const url = new URL('https://www.strava.com/oauth/token');
+
+  url.searchParams.set('client_id', STRAVA_CLIENT_ID);
+  url.searchParams.set('client_secret', STRAVA_CLIENT_SECRET);
+  url.searchParams.set('grant_type', 'refresh_token');
+  url.searchParams.set('refresh_token', stravaToken.refreshToken);
+
+  const response = await fetch(url.toString(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+  });
+
+  const data: any = await response.json();
+
+  await updateStravaToken(
+    {
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token,
+      expiresAt: data.expires_at,
+      expiresIn: data.expires_in,
+      stravaAthleteId: stravaToken.stravaAthleteId,
+      userId: userId,
+    },
+    stravaToken.id,
+  );
+
+  await createSubscription();
+  saveUserActivities(userId);
+
+  set.status = 200;
+  return true;
+};
+
+const exchangeStravaToken = async ({
+  query,
+  set,
+  redirect,
+  ...rest
+}: ElysiaContext) => {
+  const { code, userId } = query;
+
+  const isUserExists = await findStravaTokenByUserId(userId);
+
+  if (isUserExists) {
+    const isRefreshed = await refreshStravaToken({
+      query,
+      set,
+      redirect,
+      ...rest,
+    });
+    if (isRefreshed) {
+      return redirect('com.trekhive.mobile://');
+    }
+    return { message: 'Strava token not found' };
+  }
+
+  if (!code) {
+    set.status = 400;
+    return redirect('com.trekhive.mobile://');
   }
 
   const url = new URL('https://www.strava.com/oauth/token');
@@ -116,7 +168,7 @@ const exchangeStravaToken = async ({ query, set }: ElysiaContext) => {
     },
   });
 
-  const data = await response.json();
+  const data: any = await response.json();
 
   const { access_token, refresh_token, expires_at, expires_in, athlete } = data;
 
@@ -136,7 +188,7 @@ const exchangeStravaToken = async ({ query, set }: ElysiaContext) => {
     saveUserActivities(userId);
 
     set.status = 200;
-    return { message: 'Strava token successfully created' };
+    return redirect('com.trekhive.mobile://');
   } catch (err) {
     return error(500, { message: 'Failed to create subscription', error: err });
   }
@@ -161,12 +213,14 @@ const handleWebhook = async ({ body, set }: ElysiaContext) => {
 };
 
 const syncStravaActivity = async (userId: string, activityId: string) => {
-  const { data: activity } = await getStravaActivity(userId, activityId);
+  const { data: activity } = (await getStravaActivity(userId, activityId)) as {
+    data: Record<string, unknown>;
+  };
 
-  const stravaActivity = await createStravaActivity({
-    ...activity,
-    athleteId: activity.athlete.id,
-  });
+  const transformedActivity = transformStravaActivity(activity);
+  const stravaActivity = await createStravaActivity(
+    transformedActivity as unknown as InferInsertType<'stravaActivities'>,
+  );
 
   return { activity: stravaActivity };
 };
@@ -204,16 +258,13 @@ const saveUserActivities = async (userId: string) => {
     },
   });
 
-  const data = await response.json();
+  const data: Record<string, unknown>[] = await response.json();
 
-  const activities = data.map((activity: any) => ({
-    ...activity,
-    athleteId: activity.athlete.id,
-    summaryPolyline: activity?.map?.summary_polyline,
-    polyline: activity?.map?.polyline,
-  }));
+  const activities = data.map((activity) => transformStravaActivity(activity));
 
-  const stravaActivities = await createStravaActivities(activities);
+  const stravaActivities = await createStravaActivities(
+    activities as unknown as InferInsertType<'stravaActivities'>[],
+  );
 
   return { data: stravaActivities };
 };
@@ -223,5 +274,5 @@ export default {
   exchangeStravaToken,
   subscribeWebhook,
   handleWebhook,
-  refreshToken,
+  refreshStravaToken,
 };

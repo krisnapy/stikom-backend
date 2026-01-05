@@ -23,10 +23,8 @@ export const events = pgTable('events', {
   groupId: uuid('group_id').references(() => groups.id),
   name: varchar('name', { length: 100 }).notNull(),
   description: text('description'),
-  startTime: timestamp('start_time', { mode: 'date' }).notNull(),
-  endTime: timestamp('end_time', { mode: 'date' }).notNull(),
+  startDate: timestamp('start_date', { mode: 'date' }).notNull(),
   routeId: uuid('route_id').references(() => routes.id),
-  status: eventStatus('status').notNull().default('active'),
 
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
   updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow(),

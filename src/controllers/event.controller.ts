@@ -13,14 +13,19 @@ import {
   findEventById,
   updateEventById,
   cancelEventById,
+  findAllEventsByGroupId,
 } from '@/db/services/event.services';
 import { ElysiaContext } from '@/types/elysia-context.types';
 
 type EventContext = ElysiaContext<Event>;
 
-const createNewEvent = async ({ body, set }: EventContext) => {
+const createNewEvent = async ({ body, user, set }: EventContext) => {
   try {
-    const event = await createEvent(body);
+    const event = await createEvent({
+      ...body,
+      startDate: new Date(body.startDate),
+      creatorId: user.id,
+    });
 
     set.status = 201;
 
@@ -33,6 +38,16 @@ const createNewEvent = async ({ body, set }: EventContext) => {
 const getEvents = async ({ query }: EventContext) => {
   try {
     const events = await findAllEvents(query);
+
+    return { message: 'Events fetched', events };
+  } catch (err) {
+    return error(500, { message: 'Internal server error', error: err });
+  }
+};
+
+const getEventsByGroupId = async ({ params, query }: EventContext) => {
+  try {
+    const events = await findAllEventsByGroupId(params.id, query);
 
     return { message: 'Events fetched', events };
   } catch (err) {
@@ -120,4 +135,5 @@ export default {
   leaveEvent,
   getEventAttendees,
   cancelEvent,
+  getEventsByGroupId,
 };

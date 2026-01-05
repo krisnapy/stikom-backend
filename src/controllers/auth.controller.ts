@@ -45,7 +45,7 @@ const login = async ({
       });
     }
 
-    const matchPass = await bcrypt.compare(user.password, body.password);
+    const matchPass = await bcrypt.compare(body.password, user.password);
 
     if (!matchPass) {
       return error(401, {

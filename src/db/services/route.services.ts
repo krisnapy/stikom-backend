@@ -50,3 +50,21 @@ export const deleteRouteById = async (id: string) => {
   const [route] = await db.delete(routes).where(eq(routes.id, id)).returning();
   return route;
 };
+
+export const findRoutesByCreatorId = async (
+  creatorId: string,
+  pagination?: Pagination<'routes'>,
+) => {
+  const result = await getDataList<'routes'>({
+    data: routes,
+    pagination,
+    options: {
+      where: eq(routes.creatorId, creatorId),
+      with: {
+        creator: true,
+        stravaData: true,
+      },
+    },
+  });
+  return result;
+};
