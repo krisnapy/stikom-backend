@@ -1,10 +1,11 @@
-import swagger from '@elysiajs/swagger';
+import { swagger } from '@elysiajs/swagger';
 import { Elysia } from 'elysia';
-import { rateLimit } from 'elysia-rate-limit';
+
+const server: import('elysia/dist/universal/server').Server | null = null;
 
 import routes from './routes';
 
-const app = new Elysia();
+const app = new Elysia({ aot: false });
 
 app
   .use(
@@ -18,17 +19,16 @@ app
       },
     }),
   )
-  .use(
-    rateLimit({
-      max: 50,
-      skip: (ctx) => {
-        return ctx.url.includes('/api/v1/docs');
-      },
-    }),
-  )
   .use(routes)
-  .listen(9091);
+  .listen(9091, () => {
+    console.log(`Server is running on ${app.server?.url}`);
+  });
 
-console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
-);
+// server = app.server;
+
+// export default {
+//   async fetch(request: Request): Promise<Response> {
+//     // eslint-disable-next-line no-return-await
+//     return await app.fetch(request);
+//   },
+// };

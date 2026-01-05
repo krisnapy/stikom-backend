@@ -1,4 +1,4 @@
-import jwt from '@elysiajs/jwt';
+import { jwt } from '@elysiajs/jwt';
 import { Static } from '@sinclair/typebox';
 import { Elysia, t } from 'elysia';
 
@@ -16,7 +16,7 @@ export const jwtAccessSetup = new Elysia({
   jwt({
     name: 'jwtAccess',
     schema: jwtSchema,
-    secret: ACCESS_TOKEN_SECRET!,
+    secret: ACCESS_TOKEN_SECRET ?? '',
     exp: '1d',
   }),
 );

@@ -1,6 +1,6 @@
+import bcrypt from 'bcryptjs';
 import { error } from 'elysia';
 import omit from 'lodash/omit';
-import { Argon2id } from 'oslo/password';
 
 import {
   createUser,
@@ -12,13 +12,12 @@ import {
 import { InferResultType } from '@/types/drizzle.types';
 import { ElysiaContext } from '@/types/elysia-context.types';
 
-const argon2 = new Argon2id();
-
 type UserContext = ElysiaContext<InferResultType<'users'>>;
 
 const createNewUser = async ({ body, set }: UserContext) => {
   try {
-    const hashPass = await argon2.hash(body.password);
+    const salt = await bcrypt.genSalt(10);
+    const hashPass = await bcrypt.hash(body.password, salt);
 
     const user = await createUser({
       ...body,

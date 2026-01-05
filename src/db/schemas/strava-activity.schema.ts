@@ -8,6 +8,7 @@ import {
   timestamp,
   boolean,
   doublePrecision,
+  point,
 } from 'drizzle-orm/pg-core';
 
 import { InferResultType } from '@/types/drizzle.types';
@@ -32,10 +33,8 @@ export const stravaActivities = pgTable('strava_activities', {
   startDate: timestamp('start_date'),
   startDateLocal: timestamp('start_date_local'),
   timezone: varchar('timezone', { length: 100 }),
-  startLatitude: doublePrecision('start_latitude'),
-  startLongitude: doublePrecision('start_longitude'),
-  endLatitude: doublePrecision('end_latitude'),
-  endLongitude: doublePrecision('end_longitude'),
+  startLatLng: point('start_latlng'),
+  endLatLng: point('end_latlng'),
   achievementCount: integer('achievement_count'),
   kudosCount: integer('kudos_count'),
   commentCount: integer('comment_count'),

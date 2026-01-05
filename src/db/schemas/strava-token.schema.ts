@@ -8,7 +8,7 @@ import { stravaAthletes } from './strava-athlete.schema';
 import { users } from './user.schema';
 
 export const stravaTokens = pgTable('strava_tokens', {
-  id: uuid('id').primaryKey().default(uuidv7()).$defaultFn(uuidv7),
+  id: uuid('id').primaryKey().$defaultFn(uuidv7),
   userId: uuid('user_id').references(() => users.id),
   accessToken: varchar('access_token', { length: 255 }),
   refreshToken: varchar('refresh_token', { length: 255 }),

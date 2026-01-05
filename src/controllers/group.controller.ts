@@ -15,15 +15,26 @@ import {
 } from '@/db/services/group.services';
 import { InferResultType } from '@/types/drizzle.types';
 import { ElysiaContext } from '@/types/elysia-context.types';
+import { uploadImage } from '@/utils/cloudinary';
 
 type GroupContext = ElysiaContext<InferResultType<'groups'>>;
 type UserIdsContext = ElysiaContext<{ userIds: string[] }>;
 
-const createNewGroup = async ({ body, set }: GroupContext) => {
+const createNewGroup = async ({ body, set, user }: GroupContext) => {
   try {
-    const group = await createGroup(body);
+    let avatarUrl = null;
 
-    await addMemberToGroupById(group.id, [body.createdBy], 'creator');
+    if (body.avatar) {
+      avatarUrl = await uploadImage(body.avatar, 'groups');
+    }
+
+    const group = await createGroup({
+      ...body,
+      avatar: avatarUrl,
+      createdBy: user.id,
+    });
+
+    await addMemberToGroupById(group.id, [user.id], 'creator');
 
     set.status = 201;
 

@@ -1,12 +1,10 @@
+import bcrypt from 'bcryptjs';
 import { error } from 'elysia';
 import omit from 'lodash/omit';
 import pick from 'lodash/pick';
-import { Argon2id as Argon2 } from 'oslo/password';
 
 import { findAdminByEmail, findAdminById } from '@/db/services';
 import { ElysiaContext } from '@/types/elysia-context.types';
-
-const argon2 = new Argon2();
 
 export type AuthContext = ElysiaContext<{
   email: string;
@@ -34,7 +32,7 @@ const login = async ({
       });
     }
 
-    const matchPass = await argon2.verify(admin.password, body.password);
+    const matchPass = await bcrypt.compare(admin.password, body.password);
 
     if (!matchPass) {
       return error(401, {

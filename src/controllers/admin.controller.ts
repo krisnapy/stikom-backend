@@ -1,4 +1,4 @@
-import { Argon2id as Argon2 } from 'oslo/password';
+import bcrypt from 'bcryptjs';
 
 import { excludeAttributes } from '@/db/helpers/exclude-attributes';
 import {
@@ -13,11 +13,10 @@ import { ElysiaContext } from '@/types/elysia-context.types';
 
 type AdminContext = ElysiaContext<InferResultType<'admins'>>;
 
-const argon2 = new Argon2();
-
 const createNewAdmin = async ({ body, set }: AdminContext) => {
   try {
-    const hashPass = await argon2.hash(body.password);
+    const salt = await bcrypt.genSalt(10);
+    const hashPass = await bcrypt.hash(body.password, salt);
 
     const admin = await createAdmin({
       ...body,

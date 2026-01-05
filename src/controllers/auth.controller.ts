@@ -1,7 +1,8 @@
+import bcrypt from 'bcryptjs';
 import { error } from 'elysia';
 import omit from 'lodash/omit';
 import pick from 'lodash/pick';
-import { Argon2id as Argon2 } from 'oslo/password';
+import { DatabaseError } from 'pg';
 
 import {
   createUser,
@@ -10,8 +11,6 @@ import {
 } from '@/db/services/user.services';
 import { ElysiaContext } from '@/types/elysia-context.types';
 import { uploadImage } from '@/utils/cloudinary';
-
-const argon2 = new Argon2();
 
 export type AuthContext = ElysiaContext<{
   email: string;
@@ -46,7 +45,7 @@ const login = async ({
       });
     }
 
-    const matchPass = await argon2.verify(user.password, body.password);
+    const matchPass = await bcrypt.compare(body.password, user.password);
 
     if (!matchPass) {
       return error(401, {
@@ -130,7 +129,12 @@ const refreshToken = async ({
   }
 };
 
-const register = async ({ body, set }: RegisterContext) => {
+const register = async ({
+  body,
+  set,
+  generateAccessSession,
+  generateRefreshSession,
+}: RegisterContext) => {
   try {
     let avatarUrl = null;
 
@@ -138,7 +142,8 @@ const register = async ({ body, set }: RegisterContext) => {
       avatarUrl = await uploadImage(body.avatar, 'users');
     }
 
-    const hashPass = await argon2.hash(String(body.password));
+    const salt = await bcrypt.genSalt(10);
+    const hashPass = await bcrypt.hash(String(body.password), salt);
 
     const user = await createUser({
       ...body,
@@ -147,14 +152,33 @@ const register = async ({ body, set }: RegisterContext) => {
       status: 'active',
     });
 
+    const userObj = pick(user, ['id']);
+
+    await generateAccessSession(userObj);
+    await generateRefreshSession(userObj);
+
     set.status = 201;
 
     return {
       message: 'User created successfully',
       user: omit(user, ['password']),
     };
-  } catch (err) {
-    return error(500, { message: 'Internal server error', error: err });
+  } catch (err: any) {
+    const cause = err.cause as DatabaseError;
+
+    if (cause.code === '23505' && cause.constraint === 'users_email_unique') {
+      return error(409, {
+        message: 'Email address is already registered',
+        code: 'EMAIL_ALREADY_EXISTS',
+        name: 'UniqueConstraintViolation',
+      });
+    }
+
+    return error(500, {
+      message: 'Database error occurred',
+      code: err.code,
+      name: err.name,
+    });
   }
 };
 

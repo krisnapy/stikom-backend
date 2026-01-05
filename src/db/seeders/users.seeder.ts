@@ -1,11 +1,9 @@
-import { Argon2id } from 'oslo/password';
+import bcrypt from 'bcryptjs';
 
 import { InferInsertType } from '@/types/drizzle.types';
 
 import { db } from '..';
 import { users } from '../schemas';
-
-export const argon2 = new Argon2id();
 
 const userSeeds = async (): Promise<Array<InferInsertType<'users'>>> => [
   {
@@ -14,7 +12,7 @@ const userSeeds = async (): Promise<Array<InferInsertType<'users'>>> => [
     address: 'Graha Asri Persada',
     gender: 'male',
     country: 'Indonesia',
-    password: await argon2.hash('22222222'),
+    password: await bcrypt.hash('22222222', 10),
     phoneNumber: '0812345678900',
   },
   {
@@ -23,7 +21,7 @@ const userSeeds = async (): Promise<Array<InferInsertType<'users'>>> => [
     address: 'Graha Asri Persada',
     gender: 'male',
     country: 'Indonesia',
-    password: await argon2.hash('22222222'),
+    password: await bcrypt.hash('22222222', 10),
     phoneNumber: '08123456789000',
   },
 ];

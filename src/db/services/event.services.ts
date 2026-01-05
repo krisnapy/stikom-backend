@@ -35,6 +35,20 @@ export const findAllEvents = async (pagination?: Pagination<'events'>) => {
   return result;
 };
 
+export const findAllEventsByGroupId = async (
+  groupId: string,
+  pagination?: Pagination<'events'>,
+) => {
+  const result = await getDataList<'events'>({
+    data: events,
+    pagination,
+    options: {
+      where: eq(events.groupId, groupId),
+    },
+  });
+  return result;
+};
+
 export const updateEventById = async (
   id: string,
   data: InferUpdateType<'events'>,
